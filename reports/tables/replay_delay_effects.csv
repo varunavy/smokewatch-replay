@@ -1,0 +1,10 @@
+scenario_id,speed_name,delay_profile,throughput_change_eps,p95_freshness_change_hours,timely_completeness_change_pp,correctness_change_pp
+slow__none,slow,none,0.0,0.0,0.0,0.0
+slow__moderate,slow,moderate,-0.01223480830392809,1.9860000000007858,-9.816666666666663,-9.816666666666663
+slow__severe,slow,severe,-0.14843493679841124,10.972000000000712,-58.0,-58.0
+medium__none,medium,none,0.0,0.0,0.0,0.0
+medium__moderate,medium,moderate,-0.09755040483616995,1.9000000000002615,-9.816666666666663,-9.816666666666663
+medium__severe,medium,severe,-1.454970809865074,10.720000000000596,-58.0,-58.0
+fast__none,fast,none,0.0,0.0,0.0,0.0
+fast__moderate,fast,moderate,0.0,-0.18999999999959982,0.0,0.0
+fast__severe,fast,severe,0.0,-0.18999999999596184,-0.03333333333333333,-0.03333333333333333
