@@ -22,4 +22,32 @@ How do replay velocity and delayed records affect the throughput, latency, fresh
 
 ## Project Status
 
-Current phase: Proposal and data-feasibility validation.
+Current phase: Batch-reference and replay-simulation validation are complete.
+Kafka, Spark Structured Streaming, MongoDB and PostgreSQL implementation are
+the next integration stage.
+
+### Completed artifacts
+
+- `notebooks/01_full_period_pipeline.ipynb` builds and validates the complete
+  50-day, five-county data pipeline.
+- `notebooks/02_replay_preparation.ipynb` creates 18,000 deterministic replay
+  events and nine controlled replay schedules.
+- `reports/tables/` contains controlled-simulation metrics.
+- `reports/figures/` contains the corresponding simulation figures.
+- `src/evaluation/validate_batch_reference.py` independently checks the saved
+  county-hour source files and integrated batch reference.
+
+The performance tables currently describe a controlled Python simulation.
+They are not measured Kafka or Spark benchmark results.
+
+## Local data validation
+
+Raw and generated datasets are intentionally excluded from Git. After the
+local data files have been generated, run:
+
+```bash
+python src/evaluation/validate_batch_reference.py
+```
+
+The command writes a validation table to
+`reports/tables/batch_validation_summary.csv`.
