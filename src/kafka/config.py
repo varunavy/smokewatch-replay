@@ -13,17 +13,19 @@ NUM_PARTITIONS = 3
 REPLICATION_FACTOR = 1
 
 # Replay speed: how many simulated event-hours pass per real second.
-# Events are paced by their event_hour relative to the first event in the run.
+# Events are paced by their scheduled arrival time relative to the first event.
 REPLAY_SPEEDS = {
     "slow": 1.0,     # 1 event-hour per real second
     "medium": 10.0,  # 10 event-hours per real second
     "fast": 100.0,   # 100 event-hours per real second
 }
 
-# Arrival delay: scheduled_arrival_time = event_hour + delay (in hours),
-# modeling late-arriving data. Delay is drawn uniformly from [min, max].
+# Delay profiles (project methodology).
+# A deterministic fraction of events is selected by a SHA-256 rule on
+# (scenario, event_id); selected events are delayed by an amount in
+# [min_hours, max_hours] (event-hours). All other events have zero delay.
 DELAY_PROFILES = {
-    "none": (0.0, 0.0),
-    "moderate": (1.0, 6.0),
-    "severe": (12.0, 48.0),
+    "none":     {"fraction": 0.00, "min_hours": 0.0, "max_hours": 0.0},
+    "moderate": {"fraction": 0.10, "min_hours": 1.0, "max_hours": 3.0},
+    "severe":   {"fraction": 0.25, "min_hours": 4.0, "max_hours": 12.0},
 }
