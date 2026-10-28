@@ -1,0 +1,4 @@
+{"event_id": "firms-0001", "source": "nasa_firms", "county": "Butte", "event_hour": "2025-01-08T10:00:00Z", "latitude": 39.72, "longitude": -121.61, "frp": 18.4}
+{"event_id": "firms-0002", "source": "nasa_firms", "county": "Shasta", "event_hour": "2025-01-08T11:00:00Z", "latitude": 40.58, "longitude": -122.39, "frp": 7.9}
+{"event_id": "firms-0003", "source": "nasa_firms", "county": "Butte", "event_hour": "2025-01-08T12:00:00Z", "latitude": 39.75, "longitude": -121.58, "frp": 22.1}
+{"event_id": "firms-0004", "source": "nasa_firms", "county": "Tehama", "event_hour": "2025-01-08T13:00:00Z", "latitude": 40.03, "longitude": -122.12, "frp": 5.2}
