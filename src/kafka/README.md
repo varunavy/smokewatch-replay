@@ -29,13 +29,15 @@ Invalid lines are skipped and reported on stderr. Small sample files are in `dat
 
 ### Converting the standardized files (CSV to JSONL)
 
-If the standardized 2021 files are CSV, convert one file per source with `convert_to_jsonl.py`, telling it which columns hold the county and time. Example (change the column names to match the real files):
+The standardized 2021 source-event files (`smokewatch_replay_source_events_2021.zip`) are three CSVs with 6,000 rows each. Unzip them into a folder, then convert each to JSONL with `convert_to_jsonl.py`. Column mapping used: `source_name` is the source (checked against `--source`), `event_hour_utc` becomes `event_hour`; `event_id` and `county` already match. All other columns are kept in `payload` (numbers stay numbers, empty cells become null).
 
 ```bash
-python src/kafka/convert_to_jsonl.py --source nasa_firms --input <firms_2021.csv> --output data/replay_input/firms.jsonl --county-col <county_column> --time-col <timestamp_column> --event-id-col <id_column>
+python src/kafka/convert_to_jsonl.py --source nasa_firms --input <folder>/nasa_firms_events_full_2021-07-13_2021-08-31.csv --output data/replay_input/firms.jsonl --county-col county --time-col event_hour_utc --event-id-col event_id --source-col source_name
+python src/kafka/convert_to_jsonl.py --source epa_pm25 --input <folder>/epa_pm25_events_full_2021-07-13_2021-08-31.csv --output data/replay_input/epa_pm25.jsonl --county-col county --time-col event_hour_utc --event-id-col event_id --source-col source_name
+python src/kafka/convert_to_jsonl.py --source noaa_weather --input <folder>/noaa_weather_events_full_2021-07-13_2021-08-31.csv --output data/replay_input/noaa_weather.jsonl --county-col county --time-col event_hour_utc --event-id-col event_id --source-col source_name
 ```
 
-Repeat with `--source epa_pm25` and `--source noaa_weather`. Use `--date-col` plus `--hour-col` if date and hour are separate columns. If a file has no event ID column, leave out `--event-id-col` and IDs are built as `<source>-<row number>`.
+`<folder>` is where the zip was unzipped. For other files, use `--date-col` plus `--hour-col` if date and hour are separate columns; if there is no event ID column, leave out `--event-id-col` and IDs are built as `<source>-<row number>`. `data/replay_input/` holds generated data and is not committed.
 Check the result (expects 18,000 valid events, 6,000 per source):
 
 ```bash
@@ -106,7 +108,19 @@ Sample data, `--speed fast --delay severe --scenario smoke_test --dry-run --no-p
 
 Delay-rule tests (`test_delay_rules.py`, 6 tests passing) on 18,000 generated events (6,000 per source): moderate delayed about 10% (9.7% in one run) within 1 to 3 hours; severe about 25% (24.4%) within 4 to 12 hours; repeated runs gave identical output.
 
-Full real-input dry run (18,000 events, 6,000 per source): **not yet run on the real 2021 files** — to be added after conversion (see the converter command above).
+### Full real-input dry run (no Kafka involved)
+
+Real 2021 source-event files (July 13 to August 31, 2021; five counties), converted as above, `--scenario baseline --speed fast --dry-run --no-pacing`. Console output: `src/kafka/full_input_dry_run_output.txt`.
+
+- Input check: **18,000 valid events, 0 skipped, 6,000 per source** (`--expect-per-source 6000`: OK). All 18,000 event IDs are unique.
+
+| `--delay` | Events delayed | Delay range (event-hours) | Repeated run identical |
+|---|---|---|---|
+| `none` | 0 of 18,000 (0%) | n/a | yes |
+| `moderate` | 1,750 of 18,000 (9.72%) | 1.00 to 3.00 | yes |
+| `severe` | 4,552 of 18,000 (25.29%) | 4.01 to 12.00 | yes |
+
+All events that were not selected had zero delay in every run.
 
 ### Live Kafka test
 
@@ -121,5 +135,4 @@ kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic firms.events
 ## Remaining limitations
 
 - Live Kafka execution (topic creation and consumer output) has not been done.
-- The converter has not been run on the real standardized 2021 files; column names must be supplied by the user.
 - Files in `data/samples/` are synthetic examples, not real data.

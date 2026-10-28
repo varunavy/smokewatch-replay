@@ -23,6 +23,25 @@ from datetime import datetime, timezone
 from config import TOPICS
 
 
+def coerce(value):
+    """CSV text -> JSON value: '' -> null, True/False -> bool, numbers -> int/float."""
+    if value is None:
+        return None
+    v = value.strip()
+    if v == "":
+        return None
+    if v in ("True", "False"):
+        return v == "True"
+    try:
+        return int(v)
+    except ValueError:
+        pass
+    try:
+        return float(v)
+    except ValueError:
+        return v
+
+
 def to_event_hour(row, args) -> str:
     if args.time_col:
         raw = row[args.time_col].strip()
@@ -45,6 +64,8 @@ def main() -> int:
     p.add_argument("--output", required=True, help="output JSONL")
     p.add_argument("--county-col", required=True)
     p.add_argument("--event-id-col", default=None)
+    p.add_argument("--source-col", default=None,
+                   help="optional column holding the source name; every row must equal --source")
     p.add_argument("--time-col", default=None, help="column with a full timestamp")
     p.add_argument("--date-col", default=None)
     p.add_argument("--hour-col", default=None)
@@ -58,9 +79,12 @@ def main() -> int:
     with open(args.input, newline="", encoding="utf-8-sig") as fin, \
             open(args.output, "w", encoding="utf-8") as fout:
         reader = csv.DictReader(fin)
-        used = {args.county_col, args.event_id_col, args.time_col, args.date_col, args.hour_col}
+        used = {args.county_col, args.event_id_col, args.time_col, args.date_col,
+                args.hour_col, args.source_col}
         for row_no, row in enumerate(reader, 1):
             try:
+                if args.source_col and row[args.source_col].strip() != args.source:
+                    raise ValueError(f"source column is {row[args.source_col]!r}, expected {args.source!r}")
                 county = row[args.county_col].strip()
                 if not county:
                     raise ValueError("empty county")
@@ -76,7 +100,7 @@ def main() -> int:
                 }
                 for k, v in row.items():
                     if k not in used and k is not None:
-                        rec[k] = v
+                        rec[k] = coerce(v)
                 fout.write(json.dumps(rec) + "\n")
                 written += 1
             except (KeyError, ValueError) as exc:
