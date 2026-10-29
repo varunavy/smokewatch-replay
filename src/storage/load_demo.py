@@ -19,9 +19,10 @@ try:
             "county": doc["county"],
             "event_hour": doc["event_hour"],
             "ingestion_timestamp": doc["ingestion_timestamp"],
+            # Limited audit/provenance metadata only; MongoDB holds the raw event.
             "source_payload": {
-                k: v for k, v in doc.items()
-                if k not in ("_id", "event_hour", "ingestion_timestamp")
+                "original_source": doc.get("source", doc["source_name"]),
+                "raw_event_id": doc["event_id"],
             },
         }
         result = insert_source_event(conn, record)

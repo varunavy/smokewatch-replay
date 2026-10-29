@@ -10,6 +10,7 @@ Required package:
 """
 
 import os
+from copy import deepcopy
 from datetime import datetime, timezone
 
 from pymongo import MongoClient, ASCENDING
@@ -61,60 +62,46 @@ def get_collection():
     return client, collection
 
 
+SOURCE_MAP = {
+    "nasa_firms": "FIRMS",
+    "epa_pm25": "EPA",
+    "noaa_weather": "NOAA",
+    "FIRMS": "FIRMS",
+    "EPA": "EPA",
+    "NOAA": "NOAA",
+}
+
+
 def prepare_event(event):
-    """Validate and normalize required event metadata."""
-
-    required = [
-        "source_name",
-        "event_id",
-        "county",
-        "event_hour"
-    ]
-
-    missing = [
-        field for field in required
-        if field not in event or event[field] is None
-    ]
-
+    """Normalize searchable fields while retaining the complete original event."""
+    required = ["event_id", "county", "event_hour"]
+    missing = [key for key in required if event.get(key) is None]
+    if not event.get("source") and not event.get("source_name"):
+        missing.append("source or source_name")
     if missing:
-        raise ValueError(
-            f"Missing required fields: {missing}"
-        )
+        raise ValueError(f"Missing required fields: {missing}")
 
-    document = event.copy()
+    incoming_source = event.get("source", event.get("source_name"))
+    source_name = SOURCE_MAP.get(str(incoming_source))
+    if source_name is None:
+        raise ValueError(f"Unsupported source: {incoming_source}")
 
-    document["source_name"] = str(
-        document["source_name"]
-    ).upper()
+    # Preserve the exact inbound Kafka envelope, including source, payload,
+    # replay_scenario, scheduled_arrival_time and delay_hours. Do not mutate it.
+    document = deepcopy(event)
+    document["raw_message"] = deepcopy(event)
+    document["source_name"] = source_name
+    document["event_id"] = str(event["event_id"])
 
-    if document["source_name"] not in {
-        "FIRMS", "EPA", "NOAA"
-    }:
-        raise ValueError("Unsupported source name")
-
-    document["event_id"] = str(document["event_id"])
-
-    # Accept ISO timestamps or Python datetime values.
-    event_hour = document["event_hour"]
-
+    event_hour = event["event_hour"]
     if isinstance(event_hour, str):
-        event_hour = datetime.fromisoformat(
-            event_hour.replace("Z", "+00:00")
-        )
-
+        event_hour = datetime.fromisoformat(event_hour.replace("Z", "+00:00"))
+    if not isinstance(event_hour, datetime):
+        raise ValueError("event_hour must be an ISO timestamp or datetime")
     if event_hour.tzinfo is None:
-        event_hour = event_hour.replace(
-            tzinfo=timezone.utc
-        )
-
-    document["event_hour"] = event_hour.astimezone(
-        timezone.utc
-    )
-
-    document["ingestion_timestamp"] = datetime.now(
-        timezone.utc
-    )
-
+        event_hour = event_hour.replace(tzinfo=timezone.utc)
+    document["event_hour"] = event_hour.astimezone(timezone.utc)
+    document["ingestion_timestamp"] = datetime.now(timezone.utc)
     return document
 
 
@@ -195,30 +182,30 @@ def main():
 
     sample_events = [
         {
-            "source_name": "FIRMS",
-            "event_id": "demo-firms-001",
-            "county": "Plumas",
-            "event_hour": "2021-07-13T10:00:00Z",
-            "fire_detection_count": 3,
-            "satellite": "VIIRS"
+            "source": "nasa_firms", "event_id": "demo-kafka-firms-001",
+            "county": "Plumas", "event_hour": "2021-07-13T10:00:00Z",
+            "replay_scenario": "demo-normal",
+            "scheduled_arrival_time": "2021-07-13T10:00:00Z",
+            "delay_hours": 0,
+            "payload": {"fire_detection_count": 3, "satellite": "VIIRS"},
         },
         {
-            "source_name": "EPA",
-            "event_id": "demo-epa-001",
-            "county": "Plumas",
-            "event_hour": "2021-07-13T10:00:00Z",
-            "pm25_ug_m3": 42.5,
-            "parameter_code": 88101
+            "source": "epa_pm25", "event_id": "demo-kafka-epa-001",
+            "county": "Plumas", "event_hour": "2021-07-13T10:00:00Z",
+            "replay_scenario": "demo-normal",
+            "scheduled_arrival_time": "2021-07-13T10:00:00Z",
+            "delay_hours": 0,
+            "payload": {"pm25_ug_m3": 42.5, "parameter_code": 88101},
         },
         {
-            "source_name": "NOAA",
-            "event_id": "demo-noaa-001",
-            "county": "Plumas",
-            "event_hour": "2021-07-13T10:00:00Z",
-            "temperature_c": 29.1,
-            "humidity_pct": 24,
-            "wind_speed_m_s": 3.2
-        }
+            "source": "noaa_weather", "event_id": "demo-kafka-noaa-001",
+            "county": "Plumas", "event_hour": "2021-07-13T10:00:00Z",
+            "replay_scenario": "demo-normal",
+            "scheduled_arrival_time": "2021-07-13T10:00:00Z",
+            "delay_hours": 0,
+            "payload": {"temperature_c": 29.1, "humidity_pct": 24,
+                        "wind_speed_m_s": 3.2},
+        },
     ]
 
     client = None
@@ -233,6 +220,8 @@ def main():
 
         print("MongoDB connection successful")
         print("New records inserted:", inserted)
+        repeated = insert_events(collection, sample_events)
+        print("New records on repeat insert:", repeated)
         print(
             "Total records:",
             collection.count_documents({})

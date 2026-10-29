@@ -111,3 +111,41 @@ SELECT
 FROM fact_county_hour
 GROUP BY run_id, scenario_id, county_id, time_id
 HAVING COUNT(*) > 1;
+
+
+-- Q7: Final join completeness (% of county-hour facts with all 3 sources)
+-- Denominator includes all county-hour fact rows, including incomplete joins.
+SELECT
+    s.scenario_code,
+    COUNT(*) AS total_county_hours,
+    COUNT(*) FILTER (WHERE f.distinct_source_count = 3) AS complete_county_hours,
+    ROUND(100.0 * COUNT(*) FILTER (WHERE f.distinct_source_count = 3)
+          / NULLIF(COUNT(*), 0), 2) AS final_join_completeness_pct
+FROM fact_county_hour f
+JOIN dim_replay_scenario s ON f.scenario_id = s.scenario_id
+GROUP BY s.scenario_code
+ORDER BY s.scenario_code;
+
+
+-- Q8: On-time join rates at inclusive 1h, 3h and 6h thresholds.
+-- Only completed joins (3 sources) with a non-null stored freshness lag
+-- count in the numerator. Denominator: all county-hour facts per scenario.
+SELECT
+    s.scenario_code,
+    COUNT(*) AS total_county_hours,
+    ROUND(100.0 * COUNT(*) FILTER (
+        WHERE f.distinct_source_count = 3
+          AND f.freshness_lag_event_hours <= 1
+    ) / NULLIF(COUNT(*), 0), 2) AS on_time_join_rate_1h_pct,
+    ROUND(100.0 * COUNT(*) FILTER (
+        WHERE f.distinct_source_count = 3
+          AND f.freshness_lag_event_hours <= 3
+    ) / NULLIF(COUNT(*), 0), 2) AS on_time_join_rate_3h_pct,
+    ROUND(100.0 * COUNT(*) FILTER (
+        WHERE f.distinct_source_count = 3
+          AND f.freshness_lag_event_hours <= 6
+    ) / NULLIF(COUNT(*), 0), 2) AS on_time_join_rate_6h_pct
+FROM fact_county_hour f
+JOIN dim_replay_scenario s ON f.scenario_id = s.scenario_id
+GROUP BY s.scenario_code
+ORDER BY s.scenario_code;

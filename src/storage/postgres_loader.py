@@ -18,12 +18,16 @@ from psycopg2.extras import Json
 
 def get_connection():
     """Connect to the PostgreSQL warehouse."""
+    password = os.getenv("POSTGRES_PASSWORD")
+    if not password:
+        raise ValueError("POSTGRES_PASSWORD environment variable is required")
+
     return psycopg2.connect(
         host=os.getenv("POSTGRES_HOST", "localhost"),
         port=int(os.getenv("POSTGRES_PORT", "5432")),
         dbname=os.getenv("POSTGRES_DB", "smokewatch"),
         user=os.getenv("POSTGRES_USER", "postgres"),
-        password=os.getenv("POSTGRES_PASSWORD", "postgres"),
+        password=password,
         connect_timeout=5,
     )
 
@@ -240,7 +244,11 @@ def upsert_county_hour(connection, record):
 
 
 def insert_source_event(connection, record):
-    """Insert one source event without duplicating event IDs."""
+    """Insert event metadata and optional limited provenance/audit JSON.
+
+    MongoDB is the authoritative raw-event archive; source_payload is
+    not intended to contain or replace the full original Kafka message.
+    """
 
     with connection:
         with connection.cursor() as cursor:
