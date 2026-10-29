@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Local project data — do not upload
+data/raw/*
+data/interim/*
+data/processed/*
+
+# Keep the empty folder structure
+!data/raw/.gitkeep
+!data/interim/.gitkeep
+!data/processed/.gitkeep
+
+# Credentials and local settings
+.env
+*.key
+
+# macOS
+.DS_Store
