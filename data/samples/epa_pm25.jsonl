@@ -1,0 +1,4 @@
+{"event_id": "epa-0001", "source": "epa_pm25", "county": "Butte", "event_hour": "2025-01-08T10:00:00Z", "pm25_ugm3": 12.3, "site_id": "06-007-0008"}
+{"event_id": "epa-0002", "source": "epa_pm25", "county": "Shasta", "event_hour": "2025-01-08T11:00:00Z", "pm25_ugm3": 9.8, "site_id": "06-089-0004"}
+{"event_id": "epa-0003", "source": "epa_pm25", "county": "Butte", "event_hour": "2025-01-08T12:00:00Z", "pm25_ugm3": 41.7, "site_id": "06-007-0008"}
+{"event_id": "epa-0004", "source": "epa_pm25", "county": "Tehama", "event_hour": "2025-01-08T13:00:00Z", "pm25_ugm3": 15.0, "site_id": "06-103-0007"}
