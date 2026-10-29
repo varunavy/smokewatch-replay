@@ -1,5 +1,6 @@
 # DRY RUN on the real 2021 source-event files (nothing sent to Kafka)
 # Input: data/replay_input/{firms,epa_pm25,noaa_weather}.jsonl (converted from smokewatch_replay_source_events_2021.zip)
+# Delay selection depends on event_id and delay profile only (not scenario or speed).
 
 $ python src/kafka/replay_producer.py --input-dir data/replay_input --validate-only --expect-per-source 6000
 valid events: 18000  skipped invalid: 0
@@ -15,11 +16,6 @@ valid events: 18000  skipped invalid: 0
   noaa_weather: 6000
 expected 6000 per source, 18000 total: OK
 delay profile=none: 0/18000 events delayed (0.0%)
-[dry-run] topic=epa.pm25.events key=Butte value={"source": "epa_pm25", "county": "Butte", "event_hour": "2021-07-13T00:00:00Z", "event_id": "epa_pm25|butte|20210713T000000Z", "replay_scenario": "baseline", "scheduled_arrival_time": "2021-07-13T00:00:00Z", "delay_hours": 0.0, "payload": {"source_sequence": 0, "scheduled_event_time_utc": "2021-07-13 00:00:00+00:00", "source_row_present": true, "pm25_ug_m3_raw": 13.0, "
-[dry-run] topic=epa.pm25.events key=Lassen value={"source": "epa_pm25", "county": "Lassen", "event_hour": "2021-07-13T00:00:00Z", "event_id": "epa_pm25|lassen|20210713T000000Z", "replay_scenario": "baseline", "scheduled_arrival_time": "2021-07-13T00:00:00Z", "delay_hours": 0.0, "payload": {"source_sequence": 1, "scheduled_event_time_utc": "2021-07-13 00:00:00+00:00", "source_row_present": true, "pm25_ug_m3_raw": null
-[dry-run] topic=epa.pm25.events key=Plumas value={"source": "epa_pm25", "county": "Plumas", "event_hour": "2021-07-13T00:00:00Z", "event_id": "epa_pm25|plumas|20210713T000000Z", "replay_scenario": "baseline", "scheduled_arrival_time": "2021-07-13T00:00:00Z", "delay_hours": 0.0, "payload": {"source_sequence": 2, "scheduled_event_time_utc": "2021-07-13 00:00:00+00:00", "source_row_present": true, "pm25_ug_m3_raw": 0.33
-[dry-run] topic=epa.pm25.events key=Shasta value={"source": "epa_pm25", "county": "Shasta", "event_hour": "2021-07-13T00:00:00Z", "event_id": "epa_pm25|shasta|20210713T000000Z", "replay_scenario": "baseline", "scheduled_arrival_time": "2021-07-13T00:00:00Z", "delay_hours": 0.0, "payload": {"source_sequence": 3, "scheduled_event_time_utc": "2021-07-13 00:00:00+00:00", "source_row_present": true, "pm25_ug_m3_raw": 7.0,
-[dry-run] topic=epa.pm25.events key=Tehama value={"source": "epa_pm25", "county": "Tehama", "event_hour": "2021-07-13T00:00:00Z", "event_id": "epa_pm25|tehama|20210713T000000Z", "replay_scenario": "baseline", "scheduled_arrival_time": "2021-07-13T00:00:00Z", "delay_hours": 0.0, "payload": {"source_sequence": 4, "scheduled_event_time_utc": "2021-07-13 00:00:00+00:00", "source_row_present": true, "pm25_ug_m3_raw": 7.0,
 done [DRY RUN (nothing sent to Kafka)]: processed=18000 skipped_invalid=0 speed=fast delay=none scenario=baseline
 
 $ python src/kafka/replay_producer.py --input-dir data/replay_input --speed fast --delay moderate --scenario baseline --dry-run --no-pacing --quiet --expect-per-source 6000
@@ -28,12 +24,7 @@ valid events: 18000  skipped invalid: 0
   epa_pm25: 6000
   noaa_weather: 6000
 expected 6000 per source, 18000 total: OK
-delay profile=moderate: 1750/18000 events delayed (9.7%)
-[dry-run] topic=epa.pm25.events key=Butte value={"source": "epa_pm25", "county": "Butte", "event_hour": "2021-07-13T00:00:00Z", "event_id": "epa_pm25|butte|20210713T000000Z", "replay_scenario": "baseline", "scheduled_arrival_time": "2021-07-13T00:00:00Z", "delay_hours": 0.0, "payload": {"source_sequence": 0, "scheduled_event_time_utc": "2021-07-13 00:00:00+00:00", "source_row_present": true, "pm25_ug_m3_raw": 13.0, "
-[dry-run] topic=epa.pm25.events key=Lassen value={"source": "epa_pm25", "county": "Lassen", "event_hour": "2021-07-13T00:00:00Z", "event_id": "epa_pm25|lassen|20210713T000000Z", "replay_scenario": "baseline", "scheduled_arrival_time": "2021-07-13T00:00:00Z", "delay_hours": 0.0, "payload": {"source_sequence": 1, "scheduled_event_time_utc": "2021-07-13 00:00:00+00:00", "source_row_present": true, "pm25_ug_m3_raw": null
-[dry-run] topic=epa.pm25.events key=Plumas value={"source": "epa_pm25", "county": "Plumas", "event_hour": "2021-07-13T00:00:00Z", "event_id": "epa_pm25|plumas|20210713T000000Z", "replay_scenario": "baseline", "scheduled_arrival_time": "2021-07-13T00:00:00Z", "delay_hours": 0.0, "payload": {"source_sequence": 2, "scheduled_event_time_utc": "2021-07-13 00:00:00+00:00", "source_row_present": true, "pm25_ug_m3_raw": 0.33
-[dry-run] topic=epa.pm25.events key=Shasta value={"source": "epa_pm25", "county": "Shasta", "event_hour": "2021-07-13T00:00:00Z", "event_id": "epa_pm25|shasta|20210713T000000Z", "replay_scenario": "baseline", "scheduled_arrival_time": "2021-07-13T00:00:00Z", "delay_hours": 0.0, "payload": {"source_sequence": 3, "scheduled_event_time_utc": "2021-07-13 00:00:00+00:00", "source_row_present": true, "pm25_ug_m3_raw": 7.0,
-[dry-run] topic=epa.pm25.events key=Tehama value={"source": "epa_pm25", "county": "Tehama", "event_hour": "2021-07-13T00:00:00Z", "event_id": "epa_pm25|tehama|20210713T000000Z", "replay_scenario": "baseline", "scheduled_arrival_time": "2021-07-13T00:00:00Z", "delay_hours": 0.0, "payload": {"source_sequence": 4, "scheduled_event_time_utc": "2021-07-13 00:00:00+00:00", "source_row_present": true, "pm25_ug_m3_raw": 7.0,
+delay profile=moderate: 1846/18000 events delayed (10.3%)
 done [DRY RUN (nothing sent to Kafka)]: processed=18000 skipped_invalid=0 speed=fast delay=moderate scenario=baseline
 
 $ python src/kafka/replay_producer.py --input-dir data/replay_input --speed fast --delay severe --scenario baseline --dry-run --no-pacing --quiet --expect-per-source 6000
@@ -42,10 +33,16 @@ valid events: 18000  skipped invalid: 0
   epa_pm25: 6000
   noaa_weather: 6000
 expected 6000 per source, 18000 total: OK
-delay profile=severe: 4552/18000 events delayed (25.3%)
-[dry-run] topic=epa.pm25.events key=Butte value={"source": "epa_pm25", "county": "Butte", "event_hour": "2021-07-13T00:00:00Z", "event_id": "epa_pm25|butte|20210713T000000Z", "replay_scenario": "baseline", "scheduled_arrival_time": "2021-07-13T00:00:00Z", "delay_hours": 0.0, "payload": {"source_sequence": 0, "scheduled_event_time_utc": "2021-07-13 00:00:00+00:00", "source_row_present": true, "pm25_ug_m3_raw": 13.0, "
-[dry-run] topic=epa.pm25.events key=Lassen value={"source": "epa_pm25", "county": "Lassen", "event_hour": "2021-07-13T00:00:00Z", "event_id": "epa_pm25|lassen|20210713T000000Z", "replay_scenario": "baseline", "scheduled_arrival_time": "2021-07-13T00:00:00Z", "delay_hours": 0.0, "payload": {"source_sequence": 1, "scheduled_event_time_utc": "2021-07-13 00:00:00+00:00", "source_row_present": true, "pm25_ug_m3_raw": null
-[dry-run] topic=epa.pm25.events key=Plumas value={"source": "epa_pm25", "county": "Plumas", "event_hour": "2021-07-13T00:00:00Z", "event_id": "epa_pm25|plumas|20210713T000000Z", "replay_scenario": "baseline", "scheduled_arrival_time": "2021-07-13T00:00:00Z", "delay_hours": 0.0, "payload": {"source_sequence": 2, "scheduled_event_time_utc": "2021-07-13 00:00:00+00:00", "source_row_present": true, "pm25_ug_m3_raw": 0.33
-[dry-run] topic=epa.pm25.events key=Tehama value={"source": "epa_pm25", "county": "Tehama", "event_hour": "2021-07-13T00:00:00Z", "event_id": "epa_pm25|tehama|20210713T000000Z", "replay_scenario": "baseline", "scheduled_arrival_time": "2021-07-13T00:00:00Z", "delay_hours": 0.0, "payload": {"source_sequence": 4, "scheduled_event_time_utc": "2021-07-13 00:00:00+00:00", "source_row_present": true, "pm25_ug_m3_raw": 7.0,
-[dry-run] topic=firms.events key=Lassen value={"source": "nasa_firms", "county": "Lassen", "event_hour": "2021-07-13T00:00:00Z", "event_id": "nasa_firms|lassen|20210713T000000Z", "replay_scenario": "baseline", "scheduled_arrival_time": "2021-07-13T00:00:00Z", "delay_hours": 0.0, "payload": {"source_sequence": 1, "scheduled_event_time_utc": "2021-07-13 00:00:00+00:00", "source_row_present": true, "fire_detection_count
+delay profile=severe: 4549/18000 events delayed (25.3%)
 done [DRY RUN (nothing sent to Kafka)]: processed=18000 skipped_invalid=0 speed=fast delay=severe scenario=baseline
+
+# Speed independence check: slow, medium and fast runs (scenario slow__moderate, medium__moderate, fast__moderate; same for severe)
+# Compares (event_id, delay_hours, scheduled_arrival_time) for all 18,000 events across the three speeds.
+moderate  slow   scenario=slow__moderate: events=18000 delayed=1846 (10.26%)
+moderate  medium scenario=medium__moderate: events=18000 delayed=1846 (10.26%)
+moderate  fast   scenario=fast__moderate: events=18000 delayed=1846 (10.26%)
+moderate  identical delay_hours and arrival time for every event across slow/medium/fast: True
+severe    slow   scenario=slow__severe: events=18000 delayed=4549 (25.27%)
+severe    medium scenario=medium__severe: events=18000 delayed=4549 (25.27%)
+severe    fast   scenario=fast__severe: events=18000 delayed=4549 (25.27%)
+severe    identical delay_hours and arrival time for every event across slow/medium/fast: True

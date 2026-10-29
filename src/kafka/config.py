@@ -22,7 +22,8 @@ REPLAY_SPEEDS = {
 
 # Delay profiles (project methodology).
 # A deterministic fraction of events is selected by a SHA-256 rule on
-# (scenario, event_id); selected events are delayed by an amount in
+# event_id only (not the scenario or speed, so all speeds delay the same
+# events); selected events are delayed by an amount in
 # [min_hours, max_hours] (event-hours). All other events have zero delay.
 DELAY_PROFILES = {
     "none":     {"fraction": 0.00, "min_hours": 0.0, "max_hours": 0.0},

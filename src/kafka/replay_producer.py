@@ -10,12 +10,16 @@ Output: one Kafka message per record, to the topic for its source.
                   scheduled_arrival_time, delay_hours, payload}
 
 Delay rule (deterministic, SHA-256 based):
-    u = first 8 bytes of SHA-256("<scenario>:<event_id>:select") scaled to [0, 1)
+    u = first 8 bytes of SHA-256("<event_id>:select") scaled to [0, 1)
     event is delayed if u < fraction of the chosen delay profile
     delay = min_hours + v * (max_hours - min_hours), where v is derived the same
-    way from SHA-256("<scenario>:<event_id>:amount")
+    way from SHA-256("<event_id>:amount")
     scheduled_arrival_time = event_hour + delay. Non-selected events get delay 0.
-The same event_id and scenario always give the same result.
+The rule depends only on event_id and the delay profile. The scenario label (for
+example slow__moderate, medium__moderate, fast__moderate) and the replay speed are
+NOT part of the hash, so every speed delays exactly the same events by exactly the
+same amounts and replay speed is the only changed factor. The scenario is still
+written into every Kafka message to identify the run.
 
 Pacing: records are ordered by scheduled arrival time. Replay speed controls how
 many event-hours elapse per real second.
@@ -52,20 +56,23 @@ def fmt_ts(dt: datetime) -> str:
     return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def hash_unit(scenario: str, event_id: str, label: str) -> float:
-    """Deterministic number in [0, 1) from SHA-256 of scenario, event_id, label."""
-    digest = hashlib.sha256(f"{scenario}:{event_id}:{label}".encode("utf-8")).digest()
+def hash_unit(event_id: str, label: str) -> float:
+    """Deterministic number in [0, 1) from SHA-256 of event_id and label.
+
+    The scenario/speed label is deliberately not an input.
+    """
+    digest = hashlib.sha256(f"{event_id}:{label}".encode("utf-8")).digest()
     return int.from_bytes(digest[:8], "big") / 2**64
 
 
-def delay_hours_for(event_id: str, scenario: str, delay_profile: str) -> float:
+def delay_hours_for(event_id: str, delay_profile: str) -> float:
     """Return the delay (event-hours) for one event; 0.0 if not selected."""
     prof = DELAY_PROFILES[delay_profile]
     if prof["fraction"] <= 0:
         return 0.0
-    if hash_unit(scenario, event_id, "select") >= prof["fraction"]:
+    if hash_unit(event_id, "select") >= prof["fraction"]:
         return 0.0
-    v = hash_unit(scenario, event_id, "amount")
+    v = hash_unit(event_id, "amount")
     return round(prof["min_hours"] + v * (prof["max_hours"] - prof["min_hours"]), 4)
 
 
@@ -101,7 +108,7 @@ def build_messages(records, scenario: str, delay_profile: str):
     out = []
     for rec in records:
         event_hour = parse_ts(rec["event_hour"])
-        delay_h = delay_hours_for(str(rec["event_id"]), scenario, delay_profile)
+        delay_h = delay_hours_for(str(rec["event_id"]), delay_profile)
         arrival = event_hour + timedelta(hours=delay_h)
         payload = {k: v for k, v in rec.items() if k not in REQUIRED_FIELDS}
         out.append({
@@ -139,7 +146,7 @@ def main() -> int:
     p.add_argument("--bootstrap", default=BOOTSTRAP_SERVERS)
     p.add_argument("--speed", choices=REPLAY_SPEEDS, default="medium")
     p.add_argument("--delay", choices=DELAY_PROFILES, default="none")
-    p.add_argument("--scenario", default="default", help="replay scenario label (also seeds the delay rule)")
+    p.add_argument("--scenario", default="default", help="replay scenario label written into each message (does not change which events are delayed)")
     p.add_argument("--limit", type=int, default=None, help="max records to send (smoke tests)")
     p.add_argument("--dry-run", action="store_true",
                    help="print messages instead of sending (no broker needed)")

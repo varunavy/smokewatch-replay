@@ -74,7 +74,9 @@ Message **value** (JSON):
 | `moderate` | about 10% | 1 to 3 event-hours | zero delay |
 | `severe` | about 25% | 4 to 12 event-hours | zero delay |
 
-Selection uses SHA-256 of `"<scenario>:<event_id>:select"`: the first 8 bytes are scaled to a number in [0, 1), and the event is delayed when that number is below the profile's fraction (0.10 or 0.25). The delay amount is read the same way from `"<scenario>:<event_id>:amount"` and scaled into the profile's range. The same `event_id` and `--scenario` therefore always select the same events and give the same delays in repeated runs; a different scenario selects a different set. Messages are sent in order of scheduled arrival time, so delayed records arrive out of event order.
+Selection uses SHA-256 of `"<event_id>:select"`: the first 8 bytes are scaled to a number in [0, 1), and the event is delayed when that number is below the profile's fraction (0.10 or 0.25). The delay amount is read the same way from `"<event_id>:amount"` and scaled into the profile's range. The rule depends only on `event_id` and the delay profile, so repeated runs always select the same events with the same delays.
+
+**The scenario label and the replay speed are not part of the hash.** Scenario labels such as `slow__moderate`, `medium__moderate` and `fast__moderate` therefore delay exactly the same events by exactly the same amounts, and replay speed is the only changed factor. `--scenario` is still written into every Kafka message as `replay_scenario` to identify the run. Messages are sent in order of scheduled arrival time, so delayed records arrive out of event order.
 
 ## Commands
 
@@ -98,15 +100,19 @@ python src/kafka/replay_producer.py --input-dir data/samples --speed fast --dela
 
 Other options: `--limit N` to send only N records, `--bootstrap host:port` for a non-default broker.
 
-**Tests** for the delay rules: `python src/kafka/test_delay_rules.py`
+**Tests** for the delay rules (needs `pip install pytest`):
+
+```bash
+python3 -m pytest src/kafka/test_delay_rules.py -q
+```
 
 ## Execution evidence
 
 ### Dry run (no Kafka involved)
 
-Sample data, `--speed fast --delay severe --scenario smoke_test --dry-run --no-pacing`: **12 records** (4 per source), 0 skipped, 3 of 12 events delayed. Console output: `src/kafka/dry_run_output.txt`.
+Sample data, `--speed fast --delay severe --scenario smoke_test --dry-run --no-pacing`: **12 records** (4 per source), 0 skipped, 4 of 12 events delayed. Console output: `src/kafka/dry_run_output.txt`.
 
-Delay-rule tests (`test_delay_rules.py`, 6 tests passing) on 18,000 generated events (6,000 per source): moderate delayed about 10% (9.7% in one run) within 1 to 3 hours; severe about 25% (24.4%) within 4 to 12 hours; repeated runs gave identical output.
+Delay-rule tests (`test_delay_rules.py`, **9 tests passing**) on 18,000 generated events (6,000 per source): moderate delays about 10% within 1 to 3 hours; severe about 25% within 4 to 12 hours; repeated runs give identical output; and slow, medium and fast scenario labels (`slow__moderate`, `medium__moderate`, `fast__moderate`, and the same for severe) give identical `delay_hours` and scheduled arrival time for every event.
 
 ### Full real-input dry run (no Kafka involved)
 
@@ -117,10 +123,12 @@ Real 2021 source-event files (July 13 to August 31, 2021; five counties), conver
 | `--delay` | Events delayed | Delay range (event-hours) | Repeated run identical |
 |---|---|---|---|
 | `none` | 0 of 18,000 (0%) | n/a | yes |
-| `moderate` | 1,750 of 18,000 (9.72%) | 1.00 to 3.00 | yes |
-| `severe` | 4,552 of 18,000 (25.29%) | 4.01 to 12.00 | yes |
+| `moderate` | 1,846 of 18,000 (10.26%) | 1.00 to 3.00 | yes |
+| `severe` | 4,549 of 18,000 (25.27%) | 4.00 to 12.00 | yes |
 
 All events that were not selected had zero delay in every run.
+
+**Speed independence on the real data:** with scenarios `slow__moderate`, `medium__moderate` and `fast__moderate` (and `slow__severe`, `medium__severe`, `fast__severe`), all three speeds delay the same events (moderate 1,846; severe 4,549), and `delay_hours` and `scheduled_arrival_time` are identical for every one of the 18,000 events. Output is in `src/kafka/full_input_dry_run_output.txt`.
 
 ### Live Kafka test
 
