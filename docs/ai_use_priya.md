@@ -1,6 +1,6 @@
 # AI use: Priya (Kafka ingestion, replay and Bloom filter)
 
-Tool: Claude (Anthropic)
+Tool: Claude (Anthropic), Claude Sonnet 5.5 in the Claude app, with web search used for the literature references
 
 ## What it was used for
 - Step-by-step guidance for running the live Kafka replay (Docker Compose broker, topic creation, replay, count checks)
@@ -40,3 +40,22 @@ All prompts below were sent on Nov 10, 2026. Messages that were only screenshots
 19. i mean can i start Step 1: Check that your input files match the schema I'm about to write this without anyone replying or should i wait people to replky
 20. no one has replied
 21. [pasted two suggested checks] how do i check this
+22. yes
+23. can i start step 1
+24. [attached the project proposal assignment file; no typed text]
+25. [attached the final project assignment and rubric file; no typed text]
+26. tell me what i need to do next
+27. [pasted a draft message to Varuna] remove the 4th point
+28. sorry not the 4th point the 5th point.keep the 4th point
+29. 3. Fix your AI-use log how do i do this
+
+## Help provided, by task
+Prompt numbers refer to the list above.
+
+- Git and GitHub workflow (prompts 1, 5, 7, 11 to 16): explained how to use a branch, which files to commit, how to push, and how to open a pull request and share its link. I chose which files to commit and kept the data files out.
+- Kafka live run and replay (prompts 2 to 4): gave the Docker Compose broker file, the topic-creation and replay commands, and how to check per-topic counts. I ran every command myself and saved the logs under evidence/kafka/.
+- Experiment runner (prompts 8 and 9): wrote src/kafka/run_experiments.sh, which resets the topics, replays one condition and records counts and duration. I tested it on the fast__none condition.
+- Bloom-filter experiment (prompt 9): wrote experiments/bloom_filter/bloom_experiment.py. I ran it and the results are in experiments/bloom_filter/.
+- Report sections, message schema and related work (prompts 9, 10, 17 to 22): drafted the LaTeX sections in report/sections/ and docs/message_schema.md from my results. I checked the schema against all 18,000 events and checked the delay-ordering claim against the producer code. For the references, Claude searched the web and gave BibTeX entries.
+- Rubric review and planning (prompts 10, 17, 24 to 26): summarised the assignment and rubric files and listed what was missing for my part and for the project.
+- Coordination messages (prompts 6, 18 to 20, 27, 28): helped word messages to teammates, which I edited and sent myself.
