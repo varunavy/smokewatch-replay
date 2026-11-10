@@ -1,0 +1,2 @@
+repetition,speed,delay,scenario,start_utc,seconds,producer_exit,firms,epa_pm25,noaa_weather,total
+1,fast,none,fast__none,2026-11-10T17:20:17Z,12,0,6000,6000,6000,18000
