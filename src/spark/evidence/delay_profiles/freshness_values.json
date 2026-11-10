@@ -1,0 +1,9 @@
+{
+  "definition": "(scheduled_arrival_time - event_hour) / 3600",
+  "verified_utc": "2026-11-10",
+  "profiles": {
+    "none": {"rows": 4, "join_ready": 4, "freshness_min": 0.0, "freshness_max": 0.0, "droppedByWatermark": 0},
+    "moderate": {"rows": 4, "join_ready": 4, "freshness_min": 0.0, "freshness_max": 1.7233333333333334, "droppedByWatermark": 0},
+    "severe": {"rows": 4, "join_ready": 4, "freshness_min": 0.0, "freshness_max": 6.8933333333333335, "droppedByWatermark": 0}
+  }
+}
