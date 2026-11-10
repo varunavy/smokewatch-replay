@@ -1,0 +1,53 @@
+\subsection{Kafka Ingestion and Replay Design}
+
+\subsubsection{Ingestion layer}
+Events are published to Apache Kafka~\cite{kreps2011kafka}, running as a single
+broker in Docker. There is one topic per source (\texttt{firms.events},
+\texttt{epa.pm25.events} and \texttt{noaa.weather.events}), each with three
+partitions and a replication factor of one. Each message is keyed by county name,
+so all events for a county are kept in order within one partition. The message
+value is a JSON object with a common envelope (source, county, event hour, event
+identifier, replay scenario label, delay and scheduled arrival time) and a
+source-specific payload. We checked that every event in each source has the same
+set of fields.
+
+\subsubsection{Replay input}
+The input contains 18{,}000 events: 6{,}000 per source, covering five counties
+at one-hour resolution over 50 days (1{,}200 hours) of the 2021 Dixie Fire period.
+All event identifiers are unique. The replay producer reads these events and
+sends each to the topic that matches its source.
+
+\subsubsection{Replay speeds}
+Replay speed is the number of simulated event-hours replayed per real second:
+1 (slow), 10 (medium) and 100 (fast). Because the input spans 1{,}200 simulated
+hours, a full replay takes about 1{,}200, 120 and 12 seconds at the three
+settings. In a live test, the fast setting completed in 12 seconds.
+
+\subsubsection{Delay conditions}
+Late data is modelled with three delay levels. With no delay, every event arrives
+on schedule. In the moderate condition, 1{,}846 of the 18{,}000 events (10.26\%)
+are delayed by 1 to 3 hours. In the severe condition, 4{,}549 events (25.27\%) are
+delayed by 4 to 12 hours. Each delay is recorded in the message as a delay in
+hours, and the scheduled arrival time is the event hour plus that delay.
+
+Delay selection is deterministic and independent of both replay speed and the
+scenario label: in a dry run over all 18{,}000 events, every speed delayed the
+same events by the same amounts. Combining three speeds with three delay levels
+gives nine experimental conditions, each intended to be repeated three times.
+
+\subsubsection{Run isolation}
+Because Kafka topics retain messages, repeating a run without clearing them would
+mix events from different runs. Our experiment runner therefore deletes and
+recreates the three topics before every run, checks that all topic offsets are
+zero, replays the input, and records the duration, the producer exit status and
+the number of messages in each topic.
+
+\subsubsection{Verification}
+A live replay of the full input sent all 18{,}000 events with no invalid records.
+Each topic then held exactly 6{,}000 messages, and consumer samples from each
+topic showed messages whose source field matched the topic.
+
+\subsubsection{Limitations}
+The setup uses one broker with no replication, so it demonstrates the data flow
+but not fault tolerance. Replay speeds are simulated and are not a measurement of
+the original data rates.
