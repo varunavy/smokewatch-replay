@@ -10,8 +10,7 @@ injected synthetically. In each trial, 1{,}800 identifiers (10\%) were copied an
 each copy was placed at a random later position, giving a stream of 19{,}800
 events. Filters were sized for 18{,}000 distinct items at target false-positive
 rates of 5\%, 1\% and 0.1\%, using $m=-n\ln p/(\ln 2)^2$ bits and
-$k=(m/n)\ln 2$ hash functions. Hash positions were derived from SHA-256 with a
-per-trial salt. Each configuration was run for five trials, which differ in which
+$k=(m/n)\ln 2$ hash functions. Hash positions were derived from SHA-256 using double hashing~\cite{kirsch2008less}, with a per-trial salt. Each configuration was run for five trials, which differ in which
 events were duplicated, where the copies were placed, and the hash salt. An exact
 in-memory set served as ground truth. A flagged event was a false positive if it
 had not been seen before, and a missed duplicate if it had been seen but not flagged.
@@ -50,4 +49,4 @@ our Python implementation.
 \subsubsection{Limitations}
 The duplicates are synthetic because the replay input has no real duplicates, so
 the results describe filter behaviour rather than duplicate rates in the source
-data. The experiment was not integrated into the Kafka or Spark pipeline.
+data. The experiment was not integrated into the Kafka or Spark pipeline. A standard Bloom filter also fills up as events accumulate; Stable Bloom Filters~\cite{deng2006stable} address this for unbounded streams, and we did not evaluate them.
