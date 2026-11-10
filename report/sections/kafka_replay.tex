@@ -28,9 +28,9 @@ Late data is modelled with three delay levels. With no delay, every event arrive
 on schedule. In the moderate condition, 1{,}846 of the 18{,}000 events (10.26\%)
 are delayed by 1 to 3 hours. In the severe condition, 4{,}549 events (25.27\%) are
 delayed by 4 to 12 hours. Each delay is recorded in the message as a delay in
-hours, and the scheduled arrival time is the event hour plus that delay.
+hours, and the scheduled arrival time is the event hour plus that delay. The producer sends messages in order of scheduled arrival time and paces the replay by that time, so a delayed event is sent later than undelayed events from the same hour and can arrive after events with later event hours.
 
-Delay selection is deterministic and independent of both replay speed and the
+Delay selection is deterministic, depends only on the event identifier and the delay level, and is independent of both replay speed and the
 scenario label: in a dry run over all 18{,}000 events, every speed delayed the
 same events by the same amounts. Combining three speeds with three delay levels
 gives nine experimental conditions, each intended to be repeated three times.
