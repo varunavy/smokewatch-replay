@@ -47,6 +47,8 @@ A live replay of the full input sent all 18{,}000 events with no invalid records
 Each topic then held exactly 6{,}000 messages, and consumer samples from each
 topic showed messages whose source field matched the topic.
 
+Delay selection was also checked by running the moderate condition twice at each of the three speeds in dry-run mode. All six outputs of 18{,}000 messages had the same SHA-256 hash, so the messages, delays, arrival times and order were identical across runs and speeds. Live replays of the moderate and severe conditions delayed 1{,}846 and 4{,}549 events, matching the dry run, and the medium-speed replay took 120 seconds, as the speed setting predicts. A live slow-speed replay (one simulated event-hour per real second) took 1{,}200\,s and delivered all 18{,}000 messages with a clean producer exit.
+
 \subsubsection{Limitations}
 The setup uses one broker with no replication, so it demonstrates the data flow
 but not fault tolerance. Replay speeds are simulated and are not a measurement of

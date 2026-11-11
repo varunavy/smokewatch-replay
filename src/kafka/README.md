@@ -132,7 +132,7 @@ All events that were not selected had zero delay in every run.
 
 ### Live Kafka test
 
-**Not yet run.** Topic-creation output and consumer output are remaining work. To produce them:
+**Run on Nov 10, 2026** (logs are in `evidence/kafka/`). The original smoke-test commands were:
 
 ```bash
 python src/kafka/create_topics.py
@@ -142,5 +142,13 @@ kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic firms.events
 
 ## Remaining limitations
 
-- Live Kafka execution (topic creation and consumer output) has not been done.
+- Live Kafka execution was completed on Nov 10, 2026 (see `evidence/kafka/`). The nine-condition runs with Spark are still to be done.
 - Files in `data/samples/` are synthetic examples, not real data.
+
+## Live Kafka run (Nov 10, 2026)
+
+- Broker: `docker/docker-compose.yml` (single broker, Apache Kafka 3.8.0 in Docker)
+- Topics created with `python src/kafka/create_topics.py` (`evidence/kafka/topic_creation.log`)
+- Full replay of `data/replay_input`: 18,000 events sent, 0 invalid, 6,000 in each topic (`evidence/kafka/producer_full_replay.log`, `evidence/kafka/topic_counts_after_replay.log`)
+- Experiment runner: `src/kafka/run_experiments.sh`, one condition tested (`evidence/kafka/test_runs/`)
+- Delay and speed checks: `evidence/kafka/determinism_dry_run.log` and `evidence/kafka/live_checks/`
