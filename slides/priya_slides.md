@@ -45,3 +45,8 @@
 
 ## CRediT roles to confirm (Priya)
 Software; Methodology (replay and delay design); Investigation (live runs, Bloom experiment); Validation; Writing - original draft
+
+## Technical difficulty and lesson learned
+- Difficulty: the 20-minute slow replay stalled for 2 hours. The Mac most likely slept and paused the replay's timer.
+- Fix: stopped the run, discarded the partial log, re-ran with sleep prevention (caffeinate -dims). It finished in 1,200 s with 18,000 messages.
+- Lesson: run long replays on a machine that cannot sleep, and judge each run by recorded duration, exit code and per-topic counts, not by "the process is still running".

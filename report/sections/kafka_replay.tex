@@ -49,6 +49,9 @@ topic showed messages whose source field matched the topic.
 
 Delay selection was also checked by running the moderate condition twice at each of the three speeds in dry-run mode. All six outputs of 18{,}000 messages had the same SHA-256 hash, so the messages, delays, arrival times and order were identical across runs and speeds. Live replays of the moderate and severe conditions delayed 1{,}846 and 4{,}549 events, matching the dry run, and the medium-speed replay took 120 seconds, as the speed setting predicts. A live slow-speed replay (one simulated event-hour per real second) took 1{,}200\,s and delivered all 18{,}000 messages with a clean producer exit.
 
+\subsubsection{Technical Difficulty and Lesson Learned}
+The first live slow-speed replay, which should take about 20 minutes, had not finished after two hours. The runner was still alive, but no result line had been written to the summary file and the producer log held only start-up warnings. The most likely cause was the laptop going to sleep, which pauses the timed waits that the replay depends on, so the measured duration would have been meaningless. We stopped the run, discarded its partial log, and repeated it with macOS sleep prevention enabled for the whole run (\texttt{caffeinate -dims}). The repeat finished in 1{,}200\,s with a clean producer exit and 6{,}000 messages in each topic. The lesson is that long paced replays must run on a machine that cannot sleep, and that every run must be judged by recorded evidence rather than by the process still running. The experiment runner therefore records the duration, the producer exit code and the per-topic message counts for every run, which makes a stalled or interrupted run easy to detect and exclude.
+
 \subsubsection{Limitations}
 The setup uses one broker with no replication, so it demonstrates the data flow
 but not fault tolerance. Replay speeds are simulated and are not a measurement of
