@@ -59,3 +59,5 @@ Prompt numbers refer to the list above.
 - Report sections, message schema and related work (prompts 9, 10, 17 to 22): drafted the LaTeX sections in report/sections/ and docs/message_schema.md from my results. I checked the schema against all 18,000 events and checked the delay-ordering claim against the producer code. For the references, Claude searched the web and gave BibTeX entries.
 - Rubric review and planning (prompts 10, 17, 24 to 26): summarised the assignment and rubric files and listed what was missing for my part and for the project.
 - Coordination messages (prompts 6, 18 to 20, 27, 28): helped word messages to teammates, which I edited and sent myself.
+
+Reference check (Nov 10, 2026): Claude searched the web to cross-check the Grulich, Karimov and Kreps entries (authors, venue, year, pages). I then confirmed on Google Scholar that all 8 references in report/references_priya.bib exist.
