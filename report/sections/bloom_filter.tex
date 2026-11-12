@@ -1,0 +1,52 @@
+\subsection{Bloom-Filter Duplicate Detection}
+
+We evaluated a Bloom filter~\cite{bloom1970} as a memory-efficient way to detect
+duplicate events in the replay stream. The experiment is standalone: it uses the
+event identifiers from the 18{,}000-event replay input but does not run through Kafka.
+
+\subsubsection{Method}
+The replay input contains 18{,}000 unique event identifiers, so duplicates were
+injected synthetically. In each trial, 1{,}800 identifiers (10\%) were copied and
+each copy was placed at a random later position, giving a stream of 19{,}800
+events. Filters were sized for 18{,}000 distinct items at target false-positive
+rates of 5\%, 1\% and 0.1\%, using $m=-n\ln p/(\ln 2)^2$ bits and
+$k=(m/n)\ln 2$ hash functions. Hash positions were derived from SHA-256 using double hashing~\cite{kirsch2008less}, with a per-trial salt. Each configuration was run for five trials, which differ in which
+events were duplicated, where the copies were placed, and the hash salt. An exact
+in-memory set served as ground truth. A flagged event was a false positive if it
+had not been seen before, and a missed duplicate if it had been seen but not flagged.
+
+\subsubsection{Results}
+Table~\ref{tab:bloom} summarises the results. All 1{,}800 injected duplicates were
+detected in every trial, with no misses, as expected for a Bloom filter. The
+measured false-positive rate was lower than the target in each case. The target
+rate applies to a filter that already holds all items, whereas in the stream the
+filter fills gradually, so most lookups occur when it is less full. The
+corresponding full-filter rates were 5.03\%, 1.00\% and 0.10\%, which matches the
+targets and confirms the filters were sized correctly.
+
+\begin{table}[t]
+\caption{Bloom-filter results (mean of five trials; 18{,}000 distinct events, 1{,}800 injected duplicates)}
+\label{tab:bloom}
+\centering
+\begin{tabular}{lccc}
+\hline
+Target FP rate & 5\% & 1\% & 0.1\% \\
+\hline
+Hash functions & 4 & 7 & 10 \\
+Filter size (KiB) & 13.7 & 21.1 & 31.6 \\
+Duplicates detected & 1{,}800 & 1{,}800 & 1{,}800 \\
+Duplicates missed & 0 & 0 & 0 \\
+False positives & 222.2 & 29.0 & 2.2 \\
+Measured FP rate & 1.23\% & 0.16\% & 0.012\% \\
+\hline
+\end{tabular}
+\end{table}
+
+For comparison, an exact Python set of the same identifiers used about 1.78~MiB,
+so the filters were roughly 133, 87 and 58 times smaller. This figure is specific to
+our Python implementation.
+
+\subsubsection{Limitations}
+The duplicates are synthetic because the replay input has no real duplicates, so
+the results describe filter behaviour rather than duplicate rates in the source
+data. The experiment was not integrated into the Kafka or Spark pipeline. A standard Bloom filter also fills up as events accumulate; Stable Bloom Filters~\cite{deng2006stable} address this for unbounded streams, and we did not evaluate them.

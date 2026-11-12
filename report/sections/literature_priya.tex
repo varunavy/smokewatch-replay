@@ -1,0 +1,35 @@
+\subsection{Related Work}
+
+\subsubsection{Kafka and replay}
+Kafka was introduced as a distributed messaging system for collecting and
+delivering high volumes of log data with low latency~\cite{kreps2011kafka}.
+Because consumers pull messages, a consumer can be rewound, which makes a
+recorded stream straightforward to replay~\cite{kreps2011kafka}.
+
+\subsubsection{Stream benchmarks}
+Chintapalli et al.~\cite{chintapalli2016benchmarking} benchmarked Storm, Flink and
+Spark Streaming using a full pipeline built on Kafka and Redis rather than testing
+raw event-processing speed, and compared 99th-percentile latency and throughput.
+Karimov et al.~\cite{karimov2018benchmarking} proposed a benchmarking framework for
+Storm, Spark and Flink that focuses on the throughput and latency of windowed
+operations and separates the system under test from the driver. Our replay
+producer plays the role of the driver, and our conditions vary replay speed and
+delay rather than the engine.
+
+\subsubsection{Late and out-of-order data}
+Events can reach a stream processor in a different order from their event times,
+for example because of slow sources or network delays. Grulich et
+al.~\cite{grulich2019generating} describe a generator that creates reproducible
+out-of-order streams from recorded data by delaying selected events by a
+configured amount and ordering the stream by the resulting arrival time. SmokeWatch
+applies the same basic idea, delaying selected recorded events by a deterministic
+rule, to three real environmental sources replayed through Kafka.
+
+\subsubsection{Streaming algorithms: Bloom filters}
+Bloom filters~\cite{bloom1970} trade a small false-positive probability for a large
+saving in space, and have many variants~\cite{broder2004network}. Double hashing,
+where two hash values simulate additional hash functions, can be used without
+losing the asymptotic false-positive rate~\cite{kirsch2008less}. A standard filter
+eventually fills up as items accumulate; the Stable Bloom
+Filter~\cite{deng2006stable} was designed for unbounded streams by evicting stale
+information, at the cost of a small false-negative rate.
