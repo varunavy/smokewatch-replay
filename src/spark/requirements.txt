@@ -1,0 +1,4 @@
+pyspark==3.5.1
+# Runtime: Java 17. Kafka connector is a Spark package, not pip:
+# org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1
+
