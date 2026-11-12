@@ -1,0 +1,24 @@
+SmokeWatch storage validation | mode: smoke
+UTC timestamp: 2026-11-12T23:14:52.931584+00:00
+Expected MongoDB events: 12 | PostgreSQL facts: 4
+MongoDB database: smokewatch
+MongoDB matched events: 12 | total archive documents: 21
+MongoDB source counts: {'FIRMS': 4, 'EPA': 4, 'NOAA': 4}
+MongoDB missing required raw fields: 0
+MongoDB duplicate source/event keys: 0
+PostgreSQL run: sanjana_pg_smoke_01
+PostgreSQL facts: 4 | unique fact keys: 4
+PostgreSQL complete joins: 4 | all flags true: 4
+PostgreSQL missing join-ready timestamps: 0
+PostgreSQL counties: 3 | distinct UTC hours: 4
+PASS: mongo_event_count
+PASS: mongo_source_counts
+PASS: mongo_raw_envelope_fields
+PASS: mongo_no_duplicates
+PASS: pg_fact_count
+PASS: pg_no_duplicate_keys
+PASS: pg_join_complete
+PASS: pg_source_flags
+PASS: pg_ready_non_null
+Overall: PASS
+Limitations: this is a storage count/integrity audit; it does NOT validate replay-clock timeliness, measured throughput, or batch-reference value equality.
