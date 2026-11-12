@@ -61,3 +61,8 @@ Prompt numbers refer to the list above.
 - Coordination messages (prompts 6, 18 to 20, 27, 28): helped word messages to teammates, which I edited and sent myself.
 
 Reference check (Nov 10, 2026): Claude searched the web to cross-check the Grulich, Karimov and Kreps entries (authors, venue, year, pages). I then confirmed on Google Scholar that all 8 references in report/references_priya.bib exist.
+
+## LSH experiment (issue #16), Nov 12, 2026
+- Help provided by Claude: proposed the similar-condition retrieval task and its evaluation design; drafted features.py, lsh_experiment.py, the README, the report section lsh.tex and the slide text; verified the two LSH BibTeX entries (Indyk and Motwani 1998, Charikar 2002) by web search; helped interpret the results.
+- My own work: ran every script and checked the outputs, confirmed that the 5,614 empty FRP values equal the 5,614 hours with no fire detections, ran the experiment following Varuna's review clarifications, posted the proposal on issue #16, and checked both LSH references on Google Scholar.
+- Corrections to Claude's output: Claude's first feature table filled empty FRP values with the column median, which we changed to 0. One patch to features.py had an indentation error, which was fixed after I ran it and reported the error.
