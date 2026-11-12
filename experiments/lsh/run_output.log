@@ -1,0 +1,7 @@
+rows: 6000 features: 13 K: 10 signature bits: 128
+seeds: [101, 102, 103, 104, 105]
+exact baseline vector storage (KB): 609.4
+32x4: queries/run 5990 | recall@10 0.9897 +/- 0.0003 | candidate fraction 0.7493 +/- 0.0084 | exact 25.3 us +/- 1.0 | LSH 128.4 us +/- 4.2 | LSH index 1828.1 KB +/- 1.9
+16x8: queries/run 5990 | recall@10 0.9804 +/- 0.0012 | candidate fraction 0.2278 +/- 0.0210 | exact 28.4 us +/- 0.4 | LSH 50.1 us +/- 2.9 | LSH index 1246.3 KB +/- 13.7
+8x16: queries/run 5990 | recall@10 0.7939 +/- 0.0100 | candidate fraction 0.0414 +/- 0.0067 | exact 31.1 us +/- 1.0 | LSH 17.7 us +/- 0.9 | LSH index 1485.3 KB +/- 16.1
+wrote experiments/lsh/results.csv
