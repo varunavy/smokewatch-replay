@@ -1,0 +1,4 @@
+target_fp_rate,distinct_events,injected_duplicates,trials,filter_bits,hash_functions,bloom_bytes,exact_set_bytes,duplicates_detected_mean,duplicates_missed_total,false_positives_mean,measured_fp_rate,theoretical_fp_rate_full
+0.05,18000,1800,5,112235,4,14030,1870904,1800,0,222.2,0.01234,0.05027
+0.01,18000,1800,5,172532,7,21567,1870904,1800,0,29,0.00161,0.01004
+0.001,18000,1800,5,258797,10,32350,1870904,1800,0,2.2,0.00012,0.001

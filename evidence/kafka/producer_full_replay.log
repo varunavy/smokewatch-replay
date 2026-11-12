@@ -1,0 +1,10 @@
+/Users/nitin/Documents/GitHub/smokewatch-replay/src/kafka/replay_producer.py:218: DeprecationWarning: key_serializer does not implement kafka.serializer.Serializer
+  sys.exit(main())
+/Users/nitin/Documents/GitHub/smokewatch-replay/src/kafka/replay_producer.py:218: DeprecationWarning: value_serializer does not implement kafka.serializer.Serializer
+  sys.exit(main())
+valid events: 18000  skipped invalid: 0
+  nasa_firms: 6000
+  epa_pm25: 6000
+  noaa_weather: 6000
+delay profile=none: 0/18000 events delayed (0.0%)
+done [LIVE]: processed=18000 skipped_invalid=0 speed=fast delay=none scenario=baseline
