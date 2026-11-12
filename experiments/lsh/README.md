@@ -4,7 +4,11 @@ For every county-hour, find the 10 most similar strictly earlier county-hours by
 
 ## Reproduce
 
-The replay input files are not committed. Put `firms.jsonl`, `epa_pm25.jsonl` and `noaa_weather.jsonl` in `data/replay_input/`, then run from the repository root (requires numpy):
+The replay input files are not committed. Create `firms.jsonl`, `epa_pm25.jsonl` and `noaa_weather.jsonl` in `data/replay_input/` by following the conversion steps in `src/kafka/README.md`. Install the tested dependency (NumPy 2.4.6 with Python 3.14.6):
+
+    pip install -r experiments/lsh/requirements.txt
+
+Then run from the repository root:
 
     python experiments/lsh/features.py
     python experiments/lsh/lsh_experiment.py | tee experiments/lsh/run_output.log
@@ -23,11 +27,11 @@ The replay input files are not committed. Put `firms.jsonl`, `epa_pm25.jsonl` an
 
 | Banding | Recall@10 | Candidate fraction | Exact query (us) | LSH query (us) | LSH index (KB) |
 |---|---|---|---|---|---|
-| 32x4 | 0.9897 +/- 0.0003 | 0.7493 +/- 0.0084 | 25.3 | 128.4 | 1828.1 |
-| 16x8 | 0.9804 +/- 0.0012 | 0.2278 +/- 0.0210 | 28.4 | 50.1 | 1246.3 |
-| 8x16 | 0.7939 +/- 0.0100 | 0.0414 +/- 0.0067 | 31.1 | 17.7 | 1485.3 |
+| 32x4 | 0.9897 +/- 0.0003 | 0.7493 +/- 0.0084 | 48.9 | 241.3 | 1828.4 |
+| 16x8 | 0.9804 +/- 0.0012 | 0.2278 +/- 0.0210 | 51.6 | 87.0 | 1246.3 |
+| 8x16 | 0.7939 +/- 0.0100 | 0.0414 +/- 0.0067 | 46.9 | 24.7 | 1485.3 |
 
-The exact baseline stores 609.4 KB of vectors. Recall, candidate fraction and memory are deterministic given the seeds. Query times vary with the machine and its load.
+The exact baseline stores 609.4 KB of vectors. Recall and candidate fraction are deterministic given the seeds. Query times and index memory are approximate, environment-specific measurements that vary with the machine, its load and the Python and NumPy versions. The reported run used Python 3.14.6 and NumPy 2.4.6.
 
 ## Limitations
 
