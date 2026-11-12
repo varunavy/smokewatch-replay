@@ -1,0 +1,8 @@
+# run_code live check, Nov 12 2026: OUT=/tmp/runcode_test REPS=2 SPEEDS=fast DELAYS=none
+repetition,speed,delay,scenario,start_utc,seconds,producer_exit,firms,epa_pm25,noaa_weather,total,run_code
+1,fast,none,fast__none,2026-11-12T23:49:20Z,12,0,6000,6000,6000,18000,fast__none__rep1__20261112T234920Z
+2,fast,none,fast__none,2026-11-12T23:49:56Z,12,0,6000,6000,6000,18000,fast__none__rep2__20261112T234956Z
+
+# first two firms.events messages from Kafka (last run)
+{"source": "nasa_firms", "county": "Butte", "event_hour": "2021-07-13T00:00:00Z", "event_id": "nasa_firms|butte|20210713T000000Z", "replay_scenario": "fast__none", "run_code": "fast__none__rep2__20261112T234956Z", "scheduled_arrival_time": "2021-07-13T00:00:00Z", "delay_hours": 0.0, "payload": {"source_sequence": 0, "scheduled_e
+{"source": "nasa_firms", "county": "Lassen", "event_hour": "2021-07-13T00:00:00Z", "event_id": "nasa_firms|lassen|20210713T000000Z", "replay_scenario": "fast__none", "run_code": "fast__none__rep2__20261112T234956Z", "scheduled_arrival_time": "2021-07-13T00:00:00Z", "delay_hours": 0.0, "payload": {"source_sequence": 1, "scheduled
