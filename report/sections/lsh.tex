@@ -1,0 +1,34 @@
+\subsection{Locality-Sensitive Hashing for Similar-Condition Retrieval}
+
+\subsubsection{Task and data}
+SmokeWatch can answer ``when did we last see conditions like these?'' by retrieving earlier county-hours whose fire, smoke and weather conditions resemble the current one. We join the replay input by county and hour into 6{,}000 rows (five counties, 1{,}200 hours) with 13 features: six FIRMS fire measures, PM2.5, four NOAA weather measures, and wind direction as sine and cosine. Empty fire radiative power (FRP) values mean that no fire was detected and are set to 0. Missing wind direction (22.7\%) is set to 0 for both components. The remaining missing values (PM2.5 20.2\%, weather 3--4\%) are filled with the column median. All features are standardized with whole-table statistics.
+
+\subsubsection{Method}
+We use random-hyperplane signatures, a locality-sensitive hashing (LSH) family for cosine similarity \cite{charikar2002similarity}. Signature bits are grouped into bands, and two rows become candidates when they share a bucket in at least one band, which follows the general scheme of concatenating hash functions into several tables \cite{indyk1998approximate}. The signature length is fixed at 128 bits, and we compare three bandings: $32\times4$, $16\times8$ and $8\times16$ (bands $\times$ bits per band). The baseline is exact brute-force cosine top-10 over the same rows.
+
+\subsubsection{Evaluation}
+Queries run in timestamp order. All five county rows of an hour are queried before any of them is inserted, so both the LSH candidates and the exact baseline come only from strictly earlier hours. Queries with fewer than 10 earlier rows are skipped, which leaves 5{,}990 queries. We report recall@10 (overlap of the LSH top-10 with the exact top-10), candidate fraction (candidates divided by the number of eligible earlier rows), query time and the memory of the LSH bucket structure. Results are the mean and sample standard deviation over five seeds.
+
+\subsubsection{Results}
+Table~\ref{tab:lsh} shows the trade-off. The $16\times8$ banding keeps recall@10 at 0.980 while examining 22.8\% of the eligible earlier rows. The $8\times16$ banding examines only 4.1\% but finds 79.4\% of the true neighbors. At this size brute force already takes about 25--31\,$\mu$s per query, so LSH was slower than brute force for $32\times4$ and $16\times8$ and faster only for $8\times16$, where it loses recall. The LSH index also uses more memory than the 609\,KB of raw vectors.
+
+\begin{table}[t]
+\caption{LSH versus exact top-10 retrieval (128-bit signatures, five seeds, mean $\pm$ std).}
+\label{tab:lsh}
+\centering\small
+\begin{tabular}{lcccc}
+\hline
+Banding & Recall@10 & Cand. frac. & Exact / LSH ($\mu$s) & Index (KB)\\
+\hline
+$32\times4$ & $0.990\pm0.000$ & $0.749\pm0.008$ & 48.9 / 241.3 & 1828\\
+$16\times8$ & $0.980\pm0.001$ & $0.228\pm0.021$ & 51.6 / 87.0 & 1246\\
+$8\times16$ & $0.794\pm0.010$ & $0.041\pm0.007$ & 46.9 / 24.7 & 1485\\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Technical Difficulty and Lesson Learned}
+Our first feature table filled every missing value with the column median. The mean and maximum FRP columns were empty in 5{,}614 rows, and the number of hours without any fire detection was also 5{,}614, so these empty values mean ``no fire'' rather than ``unknown''. A median fill would have given quiet hours the typical FRP of burning hours and made the search treat them as fire hours. We set these values to 0 instead. The lesson is to check what a missing value means before imputing it.
+
+\subsubsection{Limitations}
+We tested one dataset size only, so we make no claim about scaling. Better relative cost for LSH on larger data is expected, but we did not measure it. The timings include Python overhead and vary with the machine and its load. Standardization uses whole-table statistics, which is acceptable offline but not in a live system. Neighbors may come from any county, since the query asks for similar conditions rather than similar places. Recall is measured by index overlap, so ties in similarity are broken arbitrarily. Index memory is measured with tracemalloc for the bucket dictionaries and lists only.
