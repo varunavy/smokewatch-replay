@@ -23,3 +23,5 @@ data/processed/*
 
 # macOS
 .DS_Store
+
+data/replay_input/

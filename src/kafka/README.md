@@ -152,3 +152,10 @@ kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic firms.events
 - Full replay of `data/replay_input`: 18,000 events sent, 0 invalid, 6,000 in each topic (`evidence/kafka/producer_full_replay.log`, `evidence/kafka/topic_counts_after_replay.log`)
 - Experiment runner: `src/kafka/run_experiments.sh`, one condition tested (`evidence/kafka/test_runs/`)
 - Delay and speed checks: `evidence/kafka/determinism_dry_run.log` and `evidence/kafka/live_checks/`
+
+## Scope of run_experiments.sh
+
+- The script records producer-side Kafka runs only: duration, producer exit code and per-topic message counts for each condition.
+- Before every run it deletes and recreates the three Kafka topics. Do not run it while a Spark query is active, because the topics would disappear under the running query.
+- It stops with an error if topic creation, the empty-topic check or the replay producer fails, so a failed run cannot produce misleading zero counts.
+- The integrated Kafka-to-Spark experiment needs coordinated Spark restarts: stop Spark before each topic reset and start it again afterwards with a fresh, isolated checkpoint directory for every run, so old offsets or state cannot affect the next condition.

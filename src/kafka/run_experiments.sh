@@ -20,8 +20,17 @@ reset_topics() {
     $KAFKA/kafka-topics.sh --bootstrap-server localhost:9092 --delete --topic "$t" >/dev/null 2>&1
   done
   sleep 8
-  python src/kafka/create_topics.py >/dev/null 2>&1
+  tmp=$(mktemp)
+  if ! python src/kafka/create_topics.py >"$tmp" 2>&1; then
+    echo "Topic creation failed. Stopping. Output:"; cat "$tmp"; rm -f "$tmp"; exit 1
+  fi
+  rm -f "$tmp"
   sleep 2
+  for t in $TOPICS; do
+    if ! $KAFKA/kafka-topics.sh --bootstrap-server localhost:9092 --describe --topic "$t" >/dev/null 2>&1; then
+      echo "Topic $t is missing after reset. Stopping."; exit 1
+    fi
+  done
 }
 
 for rep in $(seq 1 "$REPS"); do
@@ -39,6 +48,7 @@ for rep in $(seq 1 "$REPS"); do
       t1=$(date +%s)
       f=$(count_topic firms.events); e=$(count_topic epa.pm25.events); n=$(count_topic noaa.weather.events)
       echo "$rep,$speed,$delay,$scenario,$start,$((t1-t0)),$status,$f,$e,$n,$((f+e+n))" | tee -a "$SUMMARY"
+        if [ "$status" -ne 0 ]; then echo "Producer failed (exit $status) for $scenario. See $log. Stopping."; exit 1; fi
     done
   done
 done
