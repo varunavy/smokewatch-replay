@@ -192,7 +192,7 @@ def evaluate_epsilon(
 def write_results(path: Path, results: list[dict[str, float | int]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as file:
-        writer = csv.DictWriter(file, fieldnames=list(results[0]))
+        writer = csv.DictWriter(file, fieldnames=list(results[0]), lineterminator="\n")
         writer.writeheader()
         for result in results:
             writer.writerow(
