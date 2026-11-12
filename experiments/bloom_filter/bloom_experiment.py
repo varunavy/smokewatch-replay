@@ -105,7 +105,7 @@ def main():
             "theoretical_fp_rate_full": round(theory, 5),
         })
     with open(OUT_DIR + "/results.csv", "w", newline="") as fh:
-        w = csv.DictWriter(fh, fieldnames=list(rows[0].keys()))
+        w = csv.DictWriter(fh, fieldnames=list(rows[0].keys()), lineterminator="\n")
         w.writeheader()
         w.writerows(rows)
     for r in rows:

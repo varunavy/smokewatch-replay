@@ -1,15 +1,15 @@
 created  firms.events  (source=nasa_firms)
 created  epa.pm25.events  (source=epa_pm25)
 created  noaa.weather.events  (source=noaa_weather)
-Topic: firms.events	TopicId: KiSNlKkBROScxgPzu_uVbA	PartitionCount: 3	ReplicationFactor: 1	Configs: 
-	Topic: firms.events	Partition: 0	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr: 
-	Topic: firms.events	Partition: 1	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr: 
-	Topic: firms.events	Partition: 2	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr: 
-Topic: epa.pm25.events	TopicId: TfDRHvzbTRCaePz90LxwiQ	PartitionCount: 3	ReplicationFactor: 1	Configs: 
-	Topic: epa.pm25.events	Partition: 0	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr: 
-	Topic: epa.pm25.events	Partition: 1	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr: 
-	Topic: epa.pm25.events	Partition: 2	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr: 
-Topic: noaa.weather.events	TopicId: iUfe32yeR9arjqBD9dr2ag	PartitionCount: 3	ReplicationFactor: 1	Configs: 
-	Topic: noaa.weather.events	Partition: 0	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr: 
-	Topic: noaa.weather.events	Partition: 1	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr: 
-	Topic: noaa.weather.events	Partition: 2	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr: 
+Topic: firms.events	TopicId: KiSNlKkBROScxgPzu_uVbA	PartitionCount: 3	ReplicationFactor: 1	Configs:
+	Topic: firms.events	Partition: 0	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr:
+	Topic: firms.events	Partition: 1	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr:
+	Topic: firms.events	Partition: 2	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr:
+Topic: epa.pm25.events	TopicId: TfDRHvzbTRCaePz90LxwiQ	PartitionCount: 3	ReplicationFactor: 1	Configs:
+	Topic: epa.pm25.events	Partition: 0	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr:
+	Topic: epa.pm25.events	Partition: 1	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr:
+	Topic: epa.pm25.events	Partition: 2	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr:
+Topic: noaa.weather.events	TopicId: iUfe32yeR9arjqBD9dr2ag	PartitionCount: 3	ReplicationFactor: 1	Configs:
+	Topic: noaa.weather.events	Partition: 0	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr:
+	Topic: noaa.weather.events	Partition: 1	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr:
+	Topic: noaa.weather.events	Partition: 2	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr:
