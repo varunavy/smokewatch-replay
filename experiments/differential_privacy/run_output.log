@@ -1,0 +1,12 @@
+Differential privacy experiment
+input=experiments/differential_privacy/input/county_hour_fire_activity.csv
+validation=rows:6000 counties:5 dates:50 groups:250 active_county_hours:386
+query=daily fire-active hours exact_range:0-4 sensitivity:1 valid_range:0-24
+trials=200 seed=226
+epsilon=0.1 scale=10.000 mae=5.157 rmse=8.243 p95_abs_error=21.000 clipped_fraction=0.489
+epsilon=0.5 scale=2.000 mae=1.402 rmse=2.198 p95_abs_error=4.575 clipped_fraction=0.296
+epsilon=1.0 scale=1.000 mae=0.755 rmse=1.183 p95_abs_error=2.595 clipped_fraction=0.240
+epsilon=2.0 scale=0.500 mae=0.393 rmse=0.621 p95_abs_error=1.364 clipped_fraction=0.218
+epsilon=5.0 scale=0.200 mae=0.158 rmse=0.253 p95_abs_error=0.556 clipped_fraction=0.217
+results=experiments/differential_privacy/results.csv
+note=trials evaluate utility only; repeated publication would consume privacy budget
