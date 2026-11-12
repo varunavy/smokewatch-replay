@@ -1,0 +1,45 @@
+\subsection{Differential Privacy Experiment}
+
+We evaluated a small differential privacy mechanism on the NASA FIRMS portion of the replay data. The purpose was to measure the privacy--utility trade-off on a reproducible aggregate query. The source is public environmental data rather than personal data, so this experiment is a technical demonstration and not a claim that the project protects individual people.
+
+\subsubsection{Query and sensitivity}
+The query releases the daily number of county-hours with at least one fire detection. For each county-hour row, \texttt{fire\_detection\_count} is converted to one when it is greater than zero and to zero otherwise. The 24 hourly indicators are then summed for each county and date. This gives 250 county-day answers from five counties and 50 dates, with a valid output range of 0 to 24 active hours. In the observed data, the exact answers ranged from 0 to 4.
+
+We used record-level adjacency, where neighboring inputs differ in one county-hour row. A row can change only one county-day bin and its bounded contribution can change from zero to one or from one to zero. The vector query therefore has L1 sensitivity $\Delta f=1$. This bounded query was chosen instead of the raw detection count because the diagnostic check found a maximum raw value of 1,894. Adding noise directly to that unbounded value would not support a defensible sensitivity of one.
+
+\subsubsection{Mechanism and evaluation}
+The Laplace mechanism adds noise calibrated to the query sensitivity \cite{dwork2006calibrating,dwork2014algorithmic}. For privacy parameter $\epsilon$, we used independent noise with scale
+\[
+b=\frac{\Delta f}{\epsilon}=\frac{1}{\epsilon}.
+\]
+Smaller $\epsilon$ gives stronger privacy but adds more noise. After noise was added, each answer was clipped to the valid range from 0 to 24. This clipping is post-processing and does not change the privacy guarantee.
+
+The experiment tested $\epsilon\in\{0.1,0.5,1,2,5\}$. Each setting used 200 trials across all 250 county-day answers, for 50,000 evaluated releases per setting. Utility was measured with mean absolute error (MAE), root mean squared error (RMSE), the 95th-percentile absolute error, mean signed error and the fraction of noisy answers clipped to the valid range. Seed 226 was fixed for reproducibility. A complete second run produced a byte-identical results file.
+
+\subsubsection{Results}
+Table~\ref{tab:privacy-results} shows that error decreased as $\epsilon$ increased. At $\epsilon=0.1$, the noise scale was 10 and the MAE was 5.157 active hours. At $\epsilon=1$, the MAE fell to 0.755 hours. The lowest measured MAE, 0.158 hours, occurred at $\epsilon=5$, although this setting gives weaker privacy than the smaller values.
+
+\begin{table}[htbp]
+\centering
+\caption{Differential privacy utility results over 200 trials}
+\label{tab:privacy-results}
+\begin{tabular}{r r r r r r}
+\hline
+$\epsilon$ & Scale & MAE & RMSE & P95 error & Clipped \\
+\hline
+0.1 & 10.0 & 5.157 & 8.243 & 21.000 & 0.489 \\
+0.5 & 2.0 & 1.402 & 2.198 & 4.575 & 0.296 \\
+1.0 & 1.0 & 0.755 & 1.183 & 2.595 & 0.240 \\
+2.0 & 0.5 & 0.393 & 0.621 & 1.364 & 0.218 \\
+5.0 & 0.2 & 0.158 & 0.253 & 0.556 & 0.217 \\
+\hline
+\end{tabular}
+\end{table}
+
+The mean signed error was positive for every setting. This does not indicate that the Laplace noise itself was biased. Many exact county-day answers were zero, so negative noisy answers were clipped to zero while positive noisy answers remained above zero. This boundary effect also explains why about 21.7\% of answers were clipped even at $\epsilon=5$.
+
+\subsubsection{Technical difficulty and lesson learned}
+The main difficulty was defining a query with a clear adjacency rule and defensible sensitivity. The raw fire-detection values varied widely, and choosing a noise level without first bounding each row's contribution would have made the privacy claim unreliable. Converting each county-hour to a binary active indicator made the contribution limit explicit and gave sensitivity one. The main lesson is that differential privacy starts with the query and contribution bound; noise should be calibrated only after those choices are justified.
+
+\subsubsection{Limitations}
+The trial count measures expected utility under repeated simulated noise draws. It does not authorize publishing the query 200 times: actual repeated releases would consume additional privacy budget through composition. The experiment also evaluates one bounded count query, not the complete streaming pipeline. Finally, because the source contains public environmental observations, the results demonstrate the mechanism but do not measure privacy risk for an actual population of people.
