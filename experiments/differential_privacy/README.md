@@ -21,6 +21,27 @@ Independent Laplace noise is added to every county-day result with scale
 
 The noisy answers are clipped to the valid range 0--24. Clipping is post-processing and does not weaken the differential-privacy guarantee. Smaller epsilon values provide stronger privacy but require more noise.
 
+## Reproducible input
+
+The canonical experiment input is committed at
+`experiments/differential_privacy/input/county_hour_fire_activity.csv`.
+It contains 6,000 county-hour rows and only the three fields required by this
+experiment: `event_hour_utc`, `county`, and `fire_detection_count`.
+
+The fixture is a minimal projection of the full pipeline output
+`data/processed/replay/nasa_firms_events_full_2021-07-13_2021-08-31.csv`.
+The full processed dataset remains excluded from Git because it is generated
+from the upstream data pipeline. Committing this small experiment-specific
+fixture allows the experiment to run from a clean clone without private API
+keys or other local source files.
+
+Fixture SHA-256:
+
+`0a85e87577f20804ba3d37305aa1cc05ad4dab68169a950bf59f49ae220caadc`
+
+A validation run using this fixture produced a byte-identical `results.csv`
+with seed 226.
+
 ## Run the experiment
 
 From the repository root:
@@ -59,6 +80,7 @@ The results show the expected trade-off. At epsilon 0.1, strong noise protection
 
 ## Files
 
+- `input/county_hour_fire_activity.csv`: committed 6,000-row experiment input fixture
 - `privacy_experiment.py`: experiment and validation code
 - `results.csv`: aggregate metrics for the five epsilon settings
 - `run_output.log`: final 200-trial execution record
