@@ -71,3 +71,8 @@ Reference check (Nov 10, 2026): Claude searched the web to cross-check the Gruli
 - Help provided by Claude: explained what to check in a differential privacy script (query, sensitivity, Laplace scale, clipping as post-processing, MAE computation) and helped word my review comments.
 - My own work: read the code and results on GitHub, ran `git diff --check`, found that the processed input CSV was gitignored and not reproducible, and re-reviewed after the fix by verifying the fixture SHA-256, the 6,001-line row count and a byte-identical 200-trial rerun.
 - Corrections to Claude's output: none needed beyond using the real repository paths and commit hashes from my terminal.
+
+## run_code change (Kafka message contract)
+- Help provided by Claude: explained how to add a unique `run_code` per execution (producer argument, per-repetition code in `run_experiments.sh`, schema doc and README) and gave the edit commands and tests.
+- My own work: applied the edits, ran the dry-run, compared two dry-runs with different run codes to confirm the messages are identical except for `run_code` (18,000 lines), ran a live two-repetition test against Kafka, and read two real messages from the topic.
+- Corrections to Claude's output: my first producer edit had not been applied; I noticed because the dry-run output had no `run_code`, reran the edit and re-tested.

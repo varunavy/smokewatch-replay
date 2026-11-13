@@ -159,3 +159,7 @@ kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic firms.events
 - Before every run it deletes and recreates the three Kafka topics. Do not run it while a Spark query is active, because the topics would disappear under the running query.
 - It stops with an error if topic creation, the empty-topic check or the replay producer fails, so a failed run cannot produce misleading zero counts.
 - The integrated Kafka-to-Spark experiment needs coordinated Spark restarts: stop Spark before each topic reset and start it again afterwards with a fresh, isolated checkpoint directory for every run, so old offsets or state cannot affect the next condition.
+
+## Run code
+
+Every message carries a `run_code` that identifies one execution of the producer. `replay_producer.py` accepts `--run-code`; if it is omitted, a unique code is generated from the scenario, a UTC timestamp and a short random suffix. `run_experiments.sh` passes `<speed>__<delay>__rep<N>__<UTC timestamp>` for every repetition, so all 27 executions have different codes, and the code is also the last column of `summary.csv`. The same `event_id` can appear in several runs, so MongoDB should deduplicate on `run_code` plus `event_id`. The delay rule depends only on `event_id` and the delay profile, so `run_code` does not change which events are delayed.

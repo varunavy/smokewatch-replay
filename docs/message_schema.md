@@ -25,6 +25,7 @@ The county name as UTF-8 text (Butte, Lassen, Plumas, Shasta, Tehama). Events fo
 | `event_hour` | Hour the data describes, ISO 8601 UTC, e.g. `2021-07-13T01:00:00Z` |
 | `event_id` | `<source>\|<county lowercase>\|<YYYYMMDDTHHMMSSZ>`, e.g. `noaa_weather\|butte\|20210713T000000Z` |
 | `replay_scenario` | Label for the replay run, e.g. `fast__moderate`. It does not change which events are delayed |
+| `run_code` | Unique code for one execution of the producer, e.g. `fast__moderate__rep2__20261112T233045Z`. The same `event_id` appears in different runs, so storage should deduplicate on `run_code` together with `event_id`. It does not change which events are delayed |
 | `delay_hours` | Delay applied to this event: 0.0 for none, 1.0 to 3.0 (moderate), 4.0 to 12.0 (severe) |
 | `scheduled_arrival_time` | `event_hour` + `delay_hours`, same ISO format as `event_hour` |
 | `payload` | Source-specific fields, below |
