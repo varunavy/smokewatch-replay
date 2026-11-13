@@ -6,7 +6,7 @@ Any other fields are passed through in the "payload" of the Kafka message.
 
 Output: one Kafka message per record, to the topic for its source.
     key   = county (UTF-8)
-    value = JSON {source, county, event_hour, event_id, replay_scenario,
+    value = JSON {source, county, event_hour, event_id, replay_scenario, run_code,
                   scheduled_arrival_time, delay_hours, payload}
 
 Delay rule (deterministic, SHA-256 based):
@@ -103,7 +103,7 @@ def load_records(input_dir: str):
     return records, skipped
 
 
-def build_messages(records, scenario: str, delay_profile: str):
+def build_messages(records, scenario: str, delay_profile: str, run_code: str):
     """Attach scheduled arrival time and return messages sorted by arrival."""
     out = []
     for rec in records:
@@ -117,6 +117,7 @@ def build_messages(records, scenario: str, delay_profile: str):
             "event_hour": fmt_ts(event_hour),
             "event_id": rec["event_id"],
             "replay_scenario": scenario,
+            "run_code": run_code,
             "scheduled_arrival_time": fmt_ts(arrival),
             "delay_hours": delay_h,
             "payload": payload,
@@ -146,6 +147,7 @@ def main() -> int:
     p.add_argument("--bootstrap", default=BOOTSTRAP_SERVERS)
     p.add_argument("--speed", choices=REPLAY_SPEEDS, default="medium")
     p.add_argument("--delay", choices=DELAY_PROFILES, default="none")
+    p.add_argument("--run-code", default=None, help="unique code for this execution, written into each message (auto-generated if omitted)")
     p.add_argument("--scenario", default="default", help="replay scenario label written into each message (does not change which events are delayed)")
     p.add_argument("--limit", type=int, default=None, help="max records to send (smoke tests)")
     p.add_argument("--dry-run", action="store_true",
@@ -170,7 +172,10 @@ def main() -> int:
     if not ok:
         return 1
 
-    messages = build_messages(records, args.scenario, args.delay)
+    import uuid
+    from datetime import datetime, timezone
+    run_code = args.run_code or "%s__%s__%s" % (args.scenario, datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ"), uuid.uuid4().hex[:6])
+    messages = build_messages(records, args.scenario, args.delay, run_code)
     delayed = sum(1 for m in messages if m["delay_hours"] > 0)
     print(f"delay profile={args.delay}: {delayed}/{len(messages)} events delayed "
           f"({100 * delayed / len(messages):.1f}%)")
@@ -210,7 +215,7 @@ def main() -> int:
         producer.close()
     mode = "DRY RUN (nothing sent to Kafka)" if args.dry_run else "LIVE"
     print(f"done [{mode}]: processed={sent} skipped_invalid={skipped} speed={args.speed} "
-          f"delay={args.delay} scenario={args.scenario}")
+          f"delay={args.delay} scenario={args.scenario} run_code={run_code}")
     return 0
 
 
