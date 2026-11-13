@@ -95,6 +95,7 @@ ENVELOPE_SCHEMA = StructType(
         StructField("event_hour", StringType(), True),
         StructField("event_id", StringType(), True),
         StructField("replay_scenario", StringType(), True),
+        StructField("run_code", StringType(), True),
         StructField("scheduled_arrival_time", StringType(), True),
         StructField("delay_hours", DoubleType(), True),
         StructField("payload", PAYLOAD_SCHEMA, True),
@@ -216,6 +217,10 @@ def extract_measurements(events: DataFrame, default_scenario: str) -> DataFrame:
             "replay_scenario",
             F.coalesce(F.col("replay_scenario"), F.lit(default_scenario)),
         )
+        .withColumn(
+            "message_run_code",
+            F.col("run_code"),
+        )
         .withColumn("event_hour_ts", to_iso_timestamp_expr("event_hour"))
         .withColumn(
             "scheduled_arrival_ts",
@@ -264,6 +269,7 @@ def aggregate_county_hour(events: DataFrame, args: argparse.Namespace) -> DataFr
     one hour of slack. Records whose event_hour is older than
     (max observed event_hour - 13 hours) are dropped from state.
     """
+    # Prefer Kafka envelope run_code (Priya PR #23) when present; else CLI --run-code.
     grouped = (
         events.withWatermark("event_hour_ts", WATERMARK_DURATION)
         .groupBy("county", "event_hour_ts", "replay_scenario")
@@ -278,6 +284,7 @@ def aggregate_county_hour(events: DataFrame, args: argparse.Namespace) -> DataFr
             F.max("wind_direction_deg").alias("wind_direction_deg"),
             F.max("kafka_timestamp").alias("kafka_timestamp"),
             F.max("scheduled_arrival_ts").alias("scheduled_arrival_time"),
+            F.first("message_run_code", ignorenulls=True).alias("message_run_code"),
         )
     )
 
@@ -287,7 +294,7 @@ def aggregate_county_hour(events: DataFrame, args: argparse.Namespace) -> DataFr
     noaa = F.array_contains(F.col("sources"), F.lit("noaa_weather"))
 
     return grouped.select(
-        F.lit(args.run_code).alias("run_code"),
+        F.coalesce(F.col("message_run_code"), F.lit(args.run_code)).alias("run_code"),
         F.col("replay_scenario").alias("scenario_code"),
         F.lit(SPEED_SECONDS_PER_EVENT_HOUR[args.speed]).alias(
             "speed_seconds_per_event_hour"
@@ -492,6 +499,7 @@ def stage_file_envelopes(args: argparse.Namespace) -> dict[str, Path]:
             "event_hour": fmt_ts(event_hour),
             "event_id": rec["event_id"],
             "replay_scenario": scenario,
+            "run_code": args.run_code,
             "scheduled_arrival_time": fmt_ts(event_hour + timedelta(hours=delay_h)),
             "delay_hours": delay_h,
             "payload": {k: v for k, v in rec.items() if k not in REQUIRED_EVENT_FIELDS},

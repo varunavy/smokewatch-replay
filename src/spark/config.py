@@ -44,12 +44,15 @@ DELAY_LEVELS = ("none", "moderate", "severe")
 APP_NAME = "smokewatch-county-hour"
 
 # Kafka JSON envelope fields (message value). Spark parses these with from_json.
+# run_code is optional (Priya PR #23): unique per execution so Mongo/Postgres
+# can retain all 27 runs while deduping retries within one run.
 ENVELOPE_FIELDS = (
     "source",
     "county",
     "event_hour",
     "event_id",
     "replay_scenario",
+    "run_code",
     "scheduled_arrival_time",
     "delay_hours",
     "payload",
