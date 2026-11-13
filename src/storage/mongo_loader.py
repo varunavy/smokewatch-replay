@@ -46,10 +46,15 @@ def get_collection():
     # Prevent duplicate source events.
     collection.create_index(
         [
-            ("source_name", ASCENDING),
+            ("run_code", ASCENDING),
             ("event_id", ASCENDING)
         ],
-        unique=True
+        unique=True,
+        name="uniq_run_code_event_id",
+        partialFilterExpression={
+            "run_code": {"$type": "string"},
+            "event_id": {"$type": "string"}
+        }
     )
 
     collection.create_index(
@@ -74,13 +79,14 @@ SOURCE_MAP = {
 
 def prepare_event(event):
     """Normalize searchable fields while retaining the complete original event."""
-    required = ["event_id", "county", "event_hour"]
+    required = ["run_code", "event_id", "county", "event_hour"]
     missing = [key for key in required if event.get(key) is None]
     if not event.get("source") and not event.get("source_name"):
         missing.append("source or source_name")
     if missing:
         raise ValueError(f"Missing required fields: {missing}")
-
+    if not isinstance(event["run_code"], str) or not event["run_code"].strip():
+        raise ValueError("run_code must be a non-empty string")
     incoming_source = event.get("source", event.get("source_name"))
     source_name = SOURCE_MAP.get(str(incoming_source))
     if source_name is None:
@@ -92,6 +98,7 @@ def prepare_event(event):
     document["raw_message"] = deepcopy(event)
     document["source_name"] = source_name
     document["event_id"] = str(event["event_id"])
+    document["run_code"] = event["run_code"].strip()
 
     event_hour = event["event_hour"]
     if isinstance(event_hour, str):
@@ -106,7 +113,7 @@ def prepare_event(event):
 
 
 def insert_events(collection, events):
-    """Insert multiple events, skipping duplicate event IDs."""
+    """Insert events, skipping duplicate run_code/event_id pairs."""
 
     documents = [
         prepare_event(event)
@@ -182,6 +189,7 @@ def main():
 
     sample_events = [
         {
+            "run_code": "demo_storage_01",
             "source": "nasa_firms", "event_id": "demo-kafka-firms-001",
             "county": "Plumas", "event_hour": "2021-07-13T10:00:00Z",
             "replay_scenario": "demo-normal",
@@ -190,6 +198,7 @@ def main():
             "payload": {"fire_detection_count": 3, "satellite": "VIIRS"},
         },
         {
+            "run_code": "demo_storage_01",
             "source": "epa_pm25", "event_id": "demo-kafka-epa-001",
             "county": "Plumas", "event_hour": "2021-07-13T10:00:00Z",
             "replay_scenario": "demo-normal",
@@ -198,6 +207,7 @@ def main():
             "payload": {"pm25_ug_m3": 42.5, "parameter_code": 88101},
         },
         {
+            "run_code": "demo_storage_01",
             "source": "noaa_weather", "event_id": "demo-kafka-noaa-001",
             "county": "Plumas", "event_hour": "2021-07-13T10:00:00Z",
             "replay_scenario": "demo-normal",
