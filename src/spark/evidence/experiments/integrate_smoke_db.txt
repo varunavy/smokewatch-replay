@@ -1,0 +1,12 @@
+ fact_rows 
+-----------
+         4
+(1 row)
+
+      run_code       | county_name | count 
+---------------------+-------------+-------
+ integrate-smoke-001 | Butte       |     2
+ integrate-smoke-001 | Shasta      |     1
+ integrate-smoke-001 | Tehama      |     1
+(3 rows)
+

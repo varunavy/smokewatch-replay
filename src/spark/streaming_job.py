@@ -95,6 +95,7 @@ ENVELOPE_SCHEMA = StructType(
         StructField("event_hour", StringType(), True),
         StructField("event_id", StringType(), True),
         StructField("replay_scenario", StringType(), True),
+        StructField("run_code", StringType(), True),
         StructField("scheduled_arrival_time", StringType(), True),
         StructField("delay_hours", DoubleType(), True),
         StructField("payload", PAYLOAD_SCHEMA, True),
@@ -144,6 +145,8 @@ def build_spark(app_name: str, source: str) -> SparkSession:
         SparkSession.builder.appName(app_name)
         .master("local[*]")
         .config("spark.sql.session.timeZone", "UTC")
+        .config("spark.driver.extraJavaOptions", "-Duser.timezone=UTC")
+        .config("spark.executor.extraJavaOptions", "-Duser.timezone=UTC")
         .config("spark.sql.shuffle.partitions", "4")
         .config("spark.sql.debug.maxToStringFields", "200")
         .config("spark.ui.showConsoleProgress", "false")
@@ -214,6 +217,10 @@ def extract_measurements(events: DataFrame, default_scenario: str) -> DataFrame:
             "replay_scenario",
             F.coalesce(F.col("replay_scenario"), F.lit(default_scenario)),
         )
+        .withColumn(
+            "message_run_code",
+            F.col("run_code"),
+        )
         .withColumn("event_hour_ts", to_iso_timestamp_expr("event_hour"))
         .withColumn(
             "scheduled_arrival_ts",
@@ -262,6 +269,7 @@ def aggregate_county_hour(events: DataFrame, args: argparse.Namespace) -> DataFr
     one hour of slack. Records whose event_hour is older than
     (max observed event_hour - 13 hours) are dropped from state.
     """
+    # Prefer Kafka envelope run_code (Priya PR #23) when present; else CLI --run-code.
     grouped = (
         events.withWatermark("event_hour_ts", WATERMARK_DURATION)
         .groupBy("county", "event_hour_ts", "replay_scenario")
@@ -276,6 +284,7 @@ def aggregate_county_hour(events: DataFrame, args: argparse.Namespace) -> DataFr
             F.max("wind_direction_deg").alias("wind_direction_deg"),
             F.max("kafka_timestamp").alias("kafka_timestamp"),
             F.max("scheduled_arrival_ts").alias("scheduled_arrival_time"),
+            F.first("message_run_code", ignorenulls=True).alias("message_run_code"),
         )
     )
 
@@ -285,7 +294,7 @@ def aggregate_county_hour(events: DataFrame, args: argparse.Namespace) -> DataFr
     noaa = F.array_contains(F.col("sources"), F.lit("noaa_weather"))
 
     return grouped.select(
-        F.lit(args.run_code).alias("run_code"),
+        F.coalesce(F.col("message_run_code"), F.lit(args.run_code)).alias("run_code"),
         F.col("replay_scenario").alias("scenario_code"),
         F.lit(SPEED_SECONDS_PER_EVENT_HOUR[args.speed]).alias(
             "speed_seconds_per_event_hour"
@@ -311,12 +320,57 @@ def aggregate_county_hour(events: DataFrame, args: argparse.Namespace) -> DataFr
     )
 
 
-def write_batch(batch_df: DataFrame, batch_id: int, args: argparse.Namespace) -> None:
-    """foreachBatch sink: completion timestamp, console, and JSON.
+def _row_to_upsert_record(row: dict) -> dict:
+    """Map a Spark county-hour row to Sanjana's upsert_county_hour contract."""
+    event_hour = row.get("event_hour")
+    first_join = row.get("first_join_ready_at")
+    if hasattr(event_hour, "isoformat"):
+        event_hour = event_hour.isoformat().replace("+00:00", "Z")
+    if first_join is not None and hasattr(first_join, "isoformat"):
+        first_join = first_join
+    if not row.get("is_join_ready"):
+        first_join = None
+    return {
+        "run_code": row["run_code"],
+        "scenario_code": row["scenario_code"],
+        "speed_seconds_per_event_hour": float(row["speed_seconds_per_event_hour"]),
+        "delay_level": row["delay_level"],
+        "county": row["county"],
+        "event_hour": event_hour,
+        "distinct_source_count": int(row["distinct_source_count"]),
+        "fire_detection_count": row.get("fire_detection_count"),
+        "pm25_ug_m3": row.get("pm25_ug_m3"),
+        "temperature_c": row.get("temperature_c"),
+        "humidity_pct": row.get("humidity_pct"),
+        "wind_speed_m_s": row.get("wind_speed_m_s"),
+        "wind_direction_deg": row.get("wind_direction_deg"),
+        "firms_available": bool(row.get("firms_available")),
+        "epa_available": bool(row.get("epa_available")),
+        "noaa_available": bool(row.get("noaa_available")),
+        "first_join_ready_at": first_join,
+        "processing_latency_ms": (
+            float(row["processing_latency_ms"])
+            if row.get("processing_latency_ms") is not None
+            else None
+        ),
+        "freshness_lag_event_hours": (
+            float(row["freshness_lag_event_hours"])
+            if row.get("freshness_lag_event_hours") is not None
+            else None
+        ),
+    }
 
-    PostgreSQL upsert_county_hour can replace the JSON write later without
-    changing the aggregation. first_join_ready_at is set when the group first
-    reaches three sources; the warehouse COALESCE keeps the earliest value.
+
+def write_batch(batch_df: DataFrame, batch_id: int, args: argparse.Namespace) -> None:
+    """foreachBatch sink: completion timestamp, console, JSON, optional Postgres.
+
+    Freshness lag is replay-relative: hours between scheduled_arrival_time
+    (max arrival among sources in the group) and event_hour. That equals the
+    producer delay window and stays meaningful under moderate/severe delay
+    without wall-clock inflation on historical event hours.
+
+    first_join_ready_at uses scheduled_arrival_time when the group is
+    join-ready (three sources); warehouse COALESCE keeps the earliest value.
     """
     if batch_df.isEmpty():
         print(f"batch {batch_id}: 0 county-hour groups", flush=True)
@@ -328,12 +382,17 @@ def write_batch(batch_df: DataFrame, batch_id: int, args: argparse.Namespace) ->
         .withColumn("processed_at", F.current_timestamp())
         .withColumn(
             "first_join_ready_at",
-            F.when(F.col("is_join_ready"), F.col("processed_at")),
+            F.when(
+                F.col("is_join_ready"),
+                F.coalesce(F.col("scheduled_arrival_time"), F.col("processed_at")),
+            ),
         )
         .withColumn(
             "freshness_lag_event_hours",
             (
-                F.col("processed_at").cast("double")
+                F.coalesce(F.col("scheduled_arrival_time"), F.col("event_hour")).cast(
+                    "double"
+                )
                 - F.col("event_hour").cast("double")
             )
             / F.lit(3600.0),
@@ -358,15 +417,41 @@ def write_batch(batch_df: DataFrame, batch_id: int, args: argparse.Namespace) ->
     result.write.mode("append").json(str(json_dir))
     print(f"batch {batch_id}: wrote json -> {json_dir}", flush=True)
 
-    # Database integration (not required for this component):
-    # from postgres_loader import get_connection, upsert_county_hour
-    # conn = get_connection()
-    # try:
-    #     for record in result.toPandas().to_dict(orient="records"):
-    #         upsert_county_hour(conn, record)
-    # finally:
-    #     conn.close()
+    if getattr(args, "write_postgres", False):
+        sys.path.insert(0, str(REPO_ROOT / "src" / "storage"))
+        from postgres_loader import get_connection, upsert_county_hour
 
+        # Format timestamps as UTC ISO strings before collect so the driver
+        # JVM local timezone cannot shift event_hour / first_join_ready_at.
+        export_df = (
+            result.withColumn(
+                "event_hour",
+                F.date_format(F.col("event_hour"), "yyyy-MM-dd'T'HH:mm:ss'Z'"),
+            ).withColumn(
+                "first_join_ready_at",
+                F.when(
+                    F.col("first_join_ready_at").isNotNull(),
+                    F.date_format(
+                        F.col("first_join_ready_at"),
+                        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+                    ),
+                ),
+            )
+        )
+        rows = [row.asDict(recursive=True) for row in export_df.collect()]
+        conn = get_connection()
+        try:
+            for row in rows:
+                fact_id = upsert_county_hour(conn, _row_to_upsert_record(row))
+                print(
+                    f"batch {batch_id}: upsert_county_hour "
+                    f"county={row.get('county')} event_hour={row.get('event_hour')} "
+                    f"fact_id={fact_id}",
+                    flush=True,
+                )
+        finally:
+            conn.close()
+        print(f"batch {batch_id}: postgres upsert complete ({len(rows)} rows)", flush=True)
 
 def load_source_records(input_dir: Path) -> list[dict]:
     records = []
@@ -414,6 +499,7 @@ def stage_file_envelopes(args: argparse.Namespace) -> dict[str, Path]:
             "event_hour": fmt_ts(event_hour),
             "event_id": rec["event_id"],
             "replay_scenario": scenario,
+            "run_code": args.run_code,
             "scheduled_arrival_time": fmt_ts(event_hour + timedelta(hours=delay_h)),
             "delay_hours": delay_h,
             "payload": {k: v for k, v in rec.items() if k not in REQUIRED_EVENT_FIELDS},
@@ -483,6 +569,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("--interval", default="5 seconds")
     parser.add_argument("--reset-checkpoint", action="store_true")
+    parser.add_argument(
+        "--write-postgres",
+        action="store_true",
+        help="Upsert county-hour rows via src/storage/postgres_loader.upsert_county_hour "
+        "(requires POSTGRES_* env vars; default port in storage docs is 5433).",
+    )
     parser.add_argument("--app-name", default=APP_NAME)
     return parser.parse_args(argv)
 
