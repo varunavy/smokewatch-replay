@@ -23,8 +23,7 @@ from typing import Iterable
 
 
 DEFAULT_INPUT = Path(
-    "data/processed/replay/"
-    "nasa_firms_events_full_2021-07-13_2021-08-31.csv"
+    "experiments/differential_privacy/input/county_hour_fire_activity.csv"
 )
 DEFAULT_OUTPUT = Path("experiments/differential_privacy/results.csv")
 EPSILONS = (0.1, 0.5, 1.0, 2.0, 5.0)

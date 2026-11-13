@@ -66,3 +66,13 @@ Reference check (Nov 10, 2026): Claude searched the web to cross-check the Gruli
 - Help provided by Claude: proposed the similar-condition retrieval task and its evaluation design; drafted features.py, lsh_experiment.py, the README, the report section lsh.tex and the slide text; verified the two LSH BibTeX entries (Indyk and Motwani 1998, Charikar 2002) by web search; helped interpret the results.
 - My own work: ran every script and checked the outputs, confirmed that the 5,614 empty FRP values equal the 5,614 hours with no fire detections, ran the experiment following Varuna's review clarifications, posted the proposal on issue #16, and checked both LSH references on Google Scholar.
 - Corrections to Claude's output: Claude's first feature table filled empty FRP values with the column median, which we changed to 0. One patch to features.py had an indentation error, which was fixed after I ran it and reported the error.
+
+## PR #20 review (differential privacy)
+- Help provided by Claude: explained what to check in a differential privacy script (query, sensitivity, Laplace scale, clipping as post-processing, MAE computation) and helped word my review comments.
+- My own work: read the code and results on GitHub, ran `git diff --check`, found that the processed input CSV was gitignored and not reproducible, and re-reviewed after the fix by verifying the fixture SHA-256, the 6,001-line row count and a byte-identical 200-trial rerun.
+- Corrections to Claude's output: none needed beyond using the real repository paths and commit hashes from my terminal.
+
+## run_code change (Kafka message contract)
+- Help provided by Claude: explained how to add a unique `run_code` per execution (producer argument, per-repetition code in `run_experiments.sh`, schema doc and README) and gave the edit commands and tests.
+- My own work: applied the edits, ran the dry-run, compared two dry-runs with different run codes to confirm the messages are identical except for `run_code` (18,000 lines), ran a live two-repetition test against Kafka, and read two real messages from the topic.
+- Corrections to Claude's output: my first producer edit had not been applied; I noticed because the dry-run output had no `run_code`, reran the edit and re-tested.

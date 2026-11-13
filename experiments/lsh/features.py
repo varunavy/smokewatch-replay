@@ -90,7 +90,8 @@ def standardize(raw):
         x[np.isnan(x[:, j]), j] = 0.0
     med = np.nanmedian(x, axis=0)
     med = np.where(np.isnan(med), 0.0, med)
-    rows, cols = np.where(missing)
+    remaining = np.isnan(x)
+    rows, cols = np.where(remaining)
     x[rows, cols] = med[cols]
     mean = x.mean(axis=0)
     std = x.std(axis=0)

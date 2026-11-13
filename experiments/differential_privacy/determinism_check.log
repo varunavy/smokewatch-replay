@@ -1,1 +1,1 @@
-PASS: repeated 200-trial run produced identical results using seed 226
+PASS: repeated 200-trial run using the committed fixture produced identical results with seed 226

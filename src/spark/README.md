@@ -95,6 +95,7 @@ JSON output: `data/interim/spark/county_hour`. Both are gitignored.
 | `event_hour` | ISO-8601 UTC | Event time; grouping key |
 | `event_id` | string | Pass-through identity |
 | `replay_scenario` | string | Grouping key; output `scenario_code` |
+| `run_code` | string | Optional (PR #23). Unique per execution; preferred for warehouse `run_code` when present; otherwise CLI `--run-code` |
 | `scheduled_arrival_time` | ISO-8601 UTC | Replay arrival, including delay |
 | `delay_hours` | double | Event-hour delay applied by the producer |
 | `payload` | object | Source measurements (aliases accepted) |

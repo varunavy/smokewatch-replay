@@ -1,5 +1,5 @@
 Differential privacy experiment
-input=data/processed/replay/nasa_firms_events_full_2021-07-13_2021-08-31.csv
+input=experiments/differential_privacy/input/county_hour_fire_activity.csv
 validation=rows:6000 counties:5 dates:50 groups:250 active_county_hours:386
 query=daily fire-active hours exact_range:0-4 sensitivity:1 valid_range:0-24
 trials=200 seed=226
