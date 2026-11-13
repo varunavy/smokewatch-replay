@@ -1,0 +1,10 @@
+/Users/rrosevearehunt/Education/DATA226/GroupProject/src/kafka/replay_producer.py:223: DeprecationWarning: key_serializer does not implement kafka.serializer.Serializer
+  sys.exit(main())
+/Users/rrosevearehunt/Education/DATA226/GroupProject/src/kafka/replay_producer.py:223: DeprecationWarning: value_serializer does not implement kafka.serializer.Serializer
+  sys.exit(main())
+valid events: 12  skipped invalid: 0
+  nasa_firms: 4
+  epa_pm25: 4
+  noaa_weather: 4
+delay profile=none: 0/12 events delayed (0.0%)
+done [LIVE]: processed=12 skipped_invalid=0 speed=fast delay=none scenario=integrate_smoke run_code=integrate-smoke-001
