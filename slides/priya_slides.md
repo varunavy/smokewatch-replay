@@ -34,22 +34,16 @@
 - Caveats: duplicates are synthetic; standalone experiment, not in the Kafka or Spark pipeline
 
 ## Slide 5: Technical difficulty and lesson learned
-(Replace with the difficulty you found most important)
-- Challenge: Kafka keeps messages, so repeated runs would mix events
-- Fix: runner deletes and recreates the topics and checks offsets are zero before every run
-- Lesson: make experiments repeatable by resetting state and checking it
+- Difficulty: the 20-minute slow replay stalled for 2 hours. The Mac most likely slept and paused the replay's timer.
+- Fix: stopped the run, discarded the partial log, re-ran with sleep prevention (caffeinate -dims). It finished in 1,200 s with 18,000 messages.
+- Lesson: run long replays on a machine that cannot sleep, and judge each run by recorded duration, exit code and per-topic counts, not by "the process is still running".
 
 ## To add after the nine-condition runs
 - Results table from River's Spark metrics (throughput, latency, freshness, join completeness)
 - Do not add numbers until they come from real runs
 
 ## CRediT roles to confirm (Priya)
-Software; Methodology (replay and delay design); Investigation (live runs, Bloom experiment); Validation; Writing - original draft
-
-## Technical difficulty and lesson learned
-- Difficulty: the 20-minute slow replay stalled for 2 hours. The Mac most likely slept and paused the replay's timer.
-- Fix: stopped the run, discarded the partial log, re-ran with sleep prevention (caffeinate -dims). It finished in 1,200 s with 18,000 messages.
-- Lesson: run long replays on a machine that cannot sleep, and judge each run by recorded duration, exit code and per-topic counts, not by "the process is still running".
+Software; Methodology (replay and delay design, LSH evaluation design); Investigation (live runs, Bloom filter and LSH experiments); Formal analysis (LSH recall and candidate fraction); Validation (including review of PR #20); Writing - original draft
 
 ## LSH: finding similar earlier conditions
 - Task: for each county-hour, retrieve the 10 most similar earlier county-hours by fire, smoke and weather (6,000 rows, 13 features)
