@@ -1,11 +1,15 @@
 
+"""Kafka to MongoDB smoke test for a specified replay run."""
+
+import argparse
 import json
+import sys
 from uuid import uuid4
 
 from kafka import KafkaConsumer
 from mongo_loader import get_collection, insert_events
 
-RUN_CODE = "smoke_test__20261113T070747Z__a40c61"
+EXPECTED_EVENTS = 12
 
 TOPICS = [
     "firms.events",
@@ -13,45 +17,83 @@ TOPICS = [
     "noaa.weather.events",
 ]
 
-consumer = KafkaConsumer(
-    *TOPICS,
-    bootstrap_servers="localhost:9092",
-    group_id=f"smokewatch-mongo-smoke-{uuid4().hex[:8]}",
-    auto_offset_reset="earliest",
-    enable_auto_commit=False,
-    value_deserializer=lambda data: json.loads(data.decode("utf-8")),
-    consumer_timeout_ms=20000,
-)
 
-client, collection = get_collection()
+def main():
+    parser = argparse.ArgumentParser(
+        description="Validate Kafka to MongoDB smoke-test ingestion."
+    )
+    parser.add_argument(
+        "--run-code",
+        required=True,
+        help="Run code of the Kafka replay to validate",
+    )
+    args = parser.parse_args()
 
-matched = 0
-inserted = 0
+    if not args.run_code.strip():
+        parser.error("--run-code cannot be empty")
 
-try:
-    for message in consumer:
-        event = message.value
+    consumer = None
+    client = None
 
-        if event.get("run_code") != RUN_CODE:
-            continue
+    try:
+        consumer = KafkaConsumer(
+            *TOPICS,
+            bootstrap_servers="localhost:9092",
+            group_id=f"smokewatch-mongo-smoke-{uuid4().hex[:8]}",
+            auto_offset_reset="earliest",
+            enable_auto_commit=False,
+            value_deserializer=lambda data: json.loads(
+                data.decode("utf-8")
+            ),
+            consumer_timeout_ms=20000,
+        )
 
-        matched += 1
-        inserted += insert_events(collection, [event])
+        client, collection = get_collection()
 
-        if matched >= 12:
-            break
+        matched = 0
+        inserted = 0
 
-    stored = collection.count_documents({"run_code": RUN_CODE})
+        for message in consumer:
+            event = message.value
 
-    print("Kafka events matched:", matched)
-    print("New MongoDB documents inserted:", inserted)
-    print("MongoDB documents for run:", stored)
+            if event.get("run_code") != args.run_code:
+                continue
 
-    if matched == 12 and stored == 12:
-        print("PASS: Kafka to MongoDB smoke test")
-    else:
-        print("INCOMPLETE: Check Kafka messages and MongoDB")
+            matched += 1
+            inserted += insert_events(collection, [event])
 
-finally:
-    consumer.close()
-    client.close()
+            if matched >= EXPECTED_EVENTS:
+                break
+
+        stored = collection.count_documents({
+            "run_code": args.run_code
+        })
+
+        print("Run code:", args.run_code)
+        print("Kafka events matched:", matched)
+        print("New MongoDB documents inserted:", inserted)
+        print("MongoDB documents for run:", stored)
+
+        if matched == EXPECTED_EVENTS and stored == EXPECTED_EVENTS:
+            print("PASS: Kafka to MongoDB smoke test")
+            return 0
+
+        print("FAIL: Incomplete Kafka to MongoDB smoke test")
+        return 1
+
+    except Exception as exc:
+        print(
+            f"ERROR: {type(exc).__name__}: {exc}",
+            file=sys.stderr,
+        )
+        return 2
+
+    finally:
+        if consumer is not None:
+            consumer.close()
+        if client is not None:
+            client.close()
+
+
+if __name__ == "__main__":
+    sys.exit(main())
