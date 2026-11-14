@@ -10,7 +10,7 @@ We use random-hyperplane signatures, a locality-sensitive hashing (LSH) family f
 Queries run in timestamp order. All five county rows of an hour are queried before any of them is inserted, so both the LSH candidates and the exact baseline come only from strictly earlier hours. Queries with fewer than 10 earlier rows are skipped, which leaves 5{,}990 queries. We report recall@10 (overlap of the LSH top-10 with the exact top-10), candidate fraction (candidates divided by the number of eligible earlier rows), query time and the memory of the LSH bucket structure. Results are the mean and sample standard deviation over five seeds.
 
 \subsubsection{Results}
-Table~\ref{tab:lsh} shows the trade-off. The $16\times8$ banding keeps recall@10 at 0.980 while examining 22.8\% of the eligible earlier rows. The $8\times16$ banding examines only 4.1\% but finds 79.4\% of the true neighbors. At this size brute force already takes about 25--31\,$\mu$s per query, so LSH was slower than brute force for $32\times4$ and $16\times8$ and faster only for $8\times16$, where it loses recall. The LSH index also uses more memory than the 609\,KB of raw vectors.
+Table~\ref{tab:lsh} shows the trade-off. The $16\times8$ banding keeps recall@10 at 0.980 while examining 22.8\% of the eligible earlier rows. The $8\times16$ banding examines only 4.1\% but finds 79.4\% of the true neighbors. At this size brute force already takes about 47--52\,$\mu$s per query, so LSH was slower than brute force for $32\times4$ and $16\times8$ and faster only for $8\times16$, where it loses recall. The LSH index also uses more memory than the 609\,KB of raw vectors.
 
 \begin{table}[t]
 \caption{LSH versus exact top-10 retrieval (128-bit signatures, five seeds, mean $\pm$ std).}
