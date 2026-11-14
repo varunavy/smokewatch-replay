@@ -56,7 +56,7 @@ Software; Methodology (replay and delay design); Investigation (live runs, Bloom
 - Method: random-hyperplane LSH, 128-bit signatures, banding 32x4, 16x8 and 8x16
 - Baseline: exact brute-force cosine top-10 over the same strictly earlier rows (queries in time order)
 - Result: 16x8 keeps recall@10 at 0.98 while examining 23% of earlier rows; 8x16 examines 4% but recall drops to 0.79
-- Honest finding: at 6,000 rows brute force takes about 25-31 us per query, so LSH is faster only at 8x16, and its index uses 2-3x the memory of the raw vectors
+- Honest finding: at 6,000 rows brute force takes about 47-52 us per query, so LSH is faster only at 8x16, and its index uses 2-3x the memory of the raw vectors
 - Limit: one dataset size, no scaling measured
 
 ## Technical difficulty and lesson learned (LSH)
