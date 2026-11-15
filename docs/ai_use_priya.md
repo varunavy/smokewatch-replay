@@ -76,3 +76,8 @@ Reference check (Nov 10, 2026): Claude searched the web to cross-check the Gruli
 - Help provided by Claude: explained how to add a unique `run_code` per execution (producer argument, per-repetition code in `run_experiments.sh`, schema doc and README) and gave the edit commands and tests.
 - My own work: applied the edits, ran the dry-run, compared two dry-runs with different run codes to confirm the messages are identical except for `run_code` (18,000 lines), ran a live two-repetition test against Kafka, and read two real messages from the topic.
 - Corrections to Claude's output: my first producer edit had not been applied; I noticed because the dry-run output had no `run_code`, reran the edit and re-tested.
+
+## Related-work comparison (replay approaches)
+- Help provided by Claude: searched for and summarised related work on replay and stream benchmarks, and drafted the comparison subsection and seven BibTeX entries.
+- My own work: checked the delay paragraph against `replay_producer.py` (delay assigned from event_id and delay profile, arrival = event hour + delay) and reviewed the text before submission.
+- Corrections to Claude's output: none needed for the delay paragraph; I still need to add DOIs and page numbers that are missing for two references.
