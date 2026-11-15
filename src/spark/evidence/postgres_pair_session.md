@@ -39,8 +39,17 @@ python src/spark/streaming_job.py \
   --speed fast --delay none --write-postgres
 ```
 
-## Session B — live pair with Sanjana (scheduled)
+## Session B — async closeout request (2026-11-15)
 
-Draft ask is in `GroupOps/sources/email/drafts/2026-11-10-river-replies.md`.
-When Sanjana confirms host/credentials and a slot, record driver/navigator/
-duration here and attach any additional DB screenshots.
+Live co-review was still open on issue #15. On 2026-11-15 River posted an
+issue comment asking Sanjana to either:
+
+1. Acknowledge Session A (above) as satisfying the pair-programming rubric, or
+2. Propose a short live slot; River will append driver/navigator/duration here.
+
+Related evidence already on `main` from PR #6: `postgres_wire_console.log`,
+`postgres_wire_db.txt`, and full-data upserts under
+`src/spark/evidence/experiments/SUMMARY_2026-11-15.md` (6,000 facts × 3 delay
+profiles with unique `run_code`).
+
+Pending: Sanjana’s written ack or live Session B notes.

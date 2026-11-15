@@ -1,0 +1,13 @@
+{
+  "run_code": "fast__none__rep1__20261115T203657Z",
+  "scenario": "fast__none",
+  "speed": "fast",
+  "delay": "none",
+  "rep": 1,
+  "input_records": 18012,
+  "county_hour_groups": 6004,
+  "join_ready": 6004,
+  "numInputRows": 18012,
+  "dropped_by_watermark": 0,
+  "notes": "EPA/NOAA synthetic_grid placeholders; FIRMS from DP fixture. 12 leftover smoke msgs may inflate counts slightly."
+}
