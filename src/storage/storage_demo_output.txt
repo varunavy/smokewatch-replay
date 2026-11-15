@@ -1,21 +1,28 @@
-STORAGE INTEGRATION CHECK — SYNTHETIC TEST DATA
-Test ID: f95d5335a6
+STORAGE INTEGRATION CHECK - SYNTHETIC TEST DATA
+Test ID: 2dca990979
+Run code: synthetic-storage-verification-2dca990979
 MongoDB connection succeeded
 MongoDB first insert (expected 3): 3
 MongoDB repeat insert (expected 0): 0
-MongoDB matching synthetic documents: 3
-MongoDB original Kafka message preserved: True
+MongoDB Run A documents (expected 3): 3
+MongoDB Run B first insert (expected 3): 3
+MongoDB Run B repeat insert (expected 0): 0
+MongoDB Run B documents (expected 3): 3
+MongoDB documents across both runs (expected 6): 6
+MongoDB original Kafka messages preserved: True
+PASS: MongoDB run_code + event_id deduplication
 PostgreSQL connection succeeded
 PostgreSQL schema creation succeeded
 Expected PostgreSQL tables: ['dim_county', 'dim_replay_scenario', 'dim_run', 'dim_source', 'dim_time', 'fact_county_hour', 'fact_source_event']
-PostgreSQL upsert fact IDs: 3 3
+PostgreSQL upsert fact IDs: 15 15
 PostgreSQL rows after two upserts (expected 1): 1
+PASS: PostgreSQL upsert idempotency
 Analytical query 1: succeeded; returned 3 row(s)
-Analytical query 2: succeeded; returned 1 row(s)
-Analytical query 3: succeeded; returned 2 row(s)
-Analytical query 4: succeeded; returned 2 row(s)
-Analytical query 5: succeeded; returned 1 row(s)
+Analytical query 2: succeeded; returned 4 row(s)
+Analytical query 3: succeeded; returned 5 row(s)
+Analytical query 4: succeeded; returned 5 row(s)
+Analytical query 5: succeeded; returned 4 row(s)
 Analytical query 6: succeeded; returned 0 row(s)
-Analytical query 7: succeeded; returned 2 row(s)
-Analytical query 8: succeeded; returned 2 row(s)
+Analytical query 7: succeeded; returned 5 row(s)
+Analytical query 8: succeeded; returned 5 row(s)
 All local storage checks passed

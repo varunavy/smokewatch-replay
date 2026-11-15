@@ -1,0 +1,44 @@
+SmokeWatch Replay batch-reference validation
+Run date: Mon Nov  9 22:26:17 PST 2026
+Python 3.13.9
+     dataset                           check                                                       observed                              expected status
+  nasa_firms                       row_count                                                           6000                                  6000   PASS
+  nasa_firms                    column_count                                                              8                                     8   PASS
+  nasa_firms                unique_utc_hours                                                           1200                                  1200   PASS
+  nasa_firms                      county_set                          Butte, Lassen, Plumas, Shasta, Tehama Butte, Lassen, Plumas, Shasta, Tehama   PASS
+  nasa_firms      duplicate_county_hour_keys                                                              0                                     0   PASS
+  nasa_firms              invalid_timestamps                                                              0                                     0   PASS
+  nasa_firms                hours_per_county Butte:1200, Lassen:1200, Plumas:1200, Shasta:1200, Tehama:1200                  1200 for each county   PASS
+    epa_pm25                       row_count                                                           6000                                  6000   PASS
+    epa_pm25                    column_count                                                              9                                     9   PASS
+    epa_pm25                unique_utc_hours                                                           1200                                  1200   PASS
+    epa_pm25                      county_set                          Butte, Lassen, Plumas, Shasta, Tehama Butte, Lassen, Plumas, Shasta, Tehama   PASS
+    epa_pm25      duplicate_county_hour_keys                                                              0                                     0   PASS
+    epa_pm25              invalid_timestamps                                                              0                                     0   PASS
+    epa_pm25                hours_per_county Butte:1200, Lassen:1200, Plumas:1200, Shasta:1200, Tehama:1200                  1200 for each county   PASS
+noaa_weather                       row_count                                                           6000                                  6000   PASS
+noaa_weather                    column_count                                                             14                                    14   PASS
+noaa_weather                unique_utc_hours                                                           1200                                  1200   PASS
+noaa_weather                      county_set                          Butte, Lassen, Plumas, Shasta, Tehama Butte, Lassen, Plumas, Shasta, Tehama   PASS
+noaa_weather      duplicate_county_hour_keys                                                              0                                     0   PASS
+noaa_weather              invalid_timestamps                                                              0                                     0   PASS
+noaa_weather                hours_per_county Butte:1200, Lassen:1200, Plumas:1200, Shasta:1200, Tehama:1200                  1200 for each county   PASS
+  integrated                       row_count                                                           6000                                  6000   PASS
+  integrated                    column_count                                                             27                                    27   PASS
+  integrated                unique_utc_hours                                                           1200                                  1200   PASS
+  integrated                      county_set                          Butte, Lassen, Plumas, Shasta, Tehama Butte, Lassen, Plumas, Shasta, Tehama   PASS
+  integrated      duplicate_county_hour_keys                                                              0                                     0   PASS
+  integrated              invalid_timestamps                                                              0                                     0   PASS
+  integrated                hours_per_county Butte:1200, Lassen:1200, Plumas:1200, Shasta:1200, Tehama:1200                  1200 for each county   PASS
+  nasa_firms keys_match_integrated_reference                                                           6000                                  6000   PASS
+    epa_pm25 keys_match_integrated_reference                                                           6000                                  6000   PASS
+noaa_weather keys_match_integrated_reference                                                           6000                                  6000   PASS
+  nasa_firms      fire_detection_count_total                                                          53394                                 53394   PASS
+    epa_pm25            pm25_available_total                                                           4791                                  4791   PASS
+noaa_weather         weather_available_total                                                           5804                                  5804   PASS
+  integrated      fire_detection_count_total                                                          53394                                 53394   PASS
+  integrated            pm25_available_total                                                           4791                                  4791   PASS
+  integrated         weather_available_total                                                           5804                                  5804   PASS
+
+Validation summary written to: /Users/VV/Documents/GitHub/smokewatch-replay/reports/tables/batch_validation_summary.csv
+All batch-reference validation checks passed.
