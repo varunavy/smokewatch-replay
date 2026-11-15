@@ -2,21 +2,21 @@
 
 ## Purpose and Ownership
 
-* **MongoDB (`smokewatch.raw\_events`) is the authoritative raw-event archive.** It preserves the complete incoming agency/Kafka message under `raw\_message`, including `run\_code`, `source`, `event\_id`, `county`, `event\_hour`, `replay\_scenario`, `scheduled\_arrival\_time`, `delay\_hours`, and nested `payload`. Normalized searchable fields and an `ingestion\_timestamp` are stored alongside the original message.
-* **PostgreSQL is the analytical warehouse.** The `fact\_county\_hour` table stores Spark's processed county-hour measurements and join/timing metrics. Dimension tables describe runs, replay scenarios, counties, sources, and UTC hours. The optional `fact\_source\_event.source\_payload JSONB` field stores limited provenance/audit information and is not a substitute for MongoDB's complete raw-event archive.
+* **MongoDB (`smokewatch.raw_events`) is the authoritative raw-event archive.** It preserves the complete incoming agency/Kafka message under `raw_message`, including `run_code`, `source`, `event_id`, `county`, `event_hour`, `replay_scenario`, `scheduled_arrival_time`, `delay_hours`, and nested `payload`. Normalized searchable fields and an `ingestion_timestamp` are stored alongside the original message.
+* **PostgreSQL is the analytical warehouse.** The `fact_county_hour` table stores Spark's processed county-hour measurements and join/timing metrics. Dimension tables describe runs, replay scenarios, counties, sources, and UTC hours. The optional `fact_source_event.source_payload JSONB` field stores limited provenance/audit information and is not a substitute for MongoDB's complete raw-event archive.
 
 ## Files and Setup
 
 The following files implement the storage component:
 
-* `src/storage/mongo\_loader.py` — MongoDB raw Kafka/agency event storage
-* `src/storage/postgres\_loader.py` — PostgreSQL dimensional warehouse upsert functions
-* `src/storage/load\_demo.py` — Optional event-metadata demonstration
-* `src/storage/verify\_storage.py` — Local storage integration and idempotency verification
+* `src/storage/mongo_loader.py` — MongoDB raw Kafka/agency event storage
+* `src/storage/postgres_loader.py` — PostgreSQL dimensional warehouse upsert functions
+* `src/storage/load_demo.py` — Optional event-metadata demonstration
+* `src/storage/verify_storage.py` — Local storage integration and idempotency verification
 * `src/storage/requirements.txt` — Python dependencies
-* `src/storage/storage\_demo\_output.txt` — Captured local execution evidence
+* `src/storage/storage_demo_output.txt` — Captured local execution evidence
 * `sql/schema.sql` — PostgreSQL schema, constraints, and indexes
-* `sql/analysis\_queries.sql` — Eight analytical and validation queries
+* `sql/analysis_queries.sql` — Eight analytical and validation queries
 
 ### Prerequisites
 
@@ -28,16 +28,16 @@ The following files implement the storage component:
 From the repository root in Windows Command Prompt:
 
 ```bat
-python -m pip install -r src\\storage\\requirements.txt
+python -m pip install -r src\storage\requirements.txt
 
-set POSTGRES\_HOST=127.0.0.1
-set POSTGRES\_PORT=5433
-set POSTGRES\_DB=smokewatch
-set POSTGRES\_USER=postgres
-set POSTGRES\_PASSWORD=YOUR\_LOCAL\_POSTGRES\_PASSWORD
+set POSTGRES_HOST=127.0.0.1
+set POSTGRES_PORT=5433
+set POSTGRES_DB=smokewatch
+set POSTGRES_USER=postgres
+set POSTGRES_PASSWORD=YOUR_LOCAL_POSTGRES_PASSWORD
 ```
 
-`POSTGRES\_PASSWORD` is required and has no hardcoded default.
+`POSTGRES_PASSWORD` is required and has no hardcoded default.
 
 Set the actual password only in your local terminal or a secure secret manager. Never commit passwords, `.env` files containing credentials, or other secrets.
 
@@ -48,13 +48,13 @@ An existing PostgreSQL Docker volume may have been initialized with a different 
 When using the `smokewatch-postgres` Docker container:
 
 ```bat
-docker exec -i smokewatch-postgres psql -v ON\_ERROR\_STOP=1 -U postgres -d smokewatch < sql\\schema.sql
+docker exec -i smokewatch-postgres psql -v ON_ERROR_STOP=1 -U postgres -d smokewatch < sql\schema.sql
 ```
 
 Run the analytical queries:
 
 ```bat
-docker exec -i smokewatch-postgres psql -v ON\_ERROR\_STOP=1 -U postgres -d smokewatch < sql\\analysis\_queries.sql
+docker exec -i smokewatch-postgres psql -v ON_ERROR_STOP=1 -U postgres -d smokewatch < sql\analysis_queries.sql
 ```
 
 ## Priya's Kafka → MongoDB Contract
@@ -62,28 +62,28 @@ docker exec -i smokewatch-postgres psql -v ON\_ERROR\_STOP=1 -U postgres -d smok
 The MongoDB loader accepts incoming Kafka messages through:
 
 ```python
-insert\_events(collection, \[message])
+insert_events(collection, [message])
 ```
 
 Supported Kafka source values:
 
-|Kafka `source`|MongoDB `source\_name`|
+|Kafka `source`|MongoDB `source_name`|
 |-|-|
-|`nasa\_firms`|`FIRMS`|
-|`epa\_pm25`|`EPA`|
-|`noaa\_weather`|`NOAA`|
+|`nasa_firms`|`FIRMS`|
+|`epa_pm25`|`EPA`|
+|`noaa_weather`|`NOAA`|
 
-Existing normalized `source\_name` values (`FIRMS`, `EPA`, `NOAA`) are also supported.
+Existing normalized `source_name` values (`FIRMS`, `EPA`, `NOAA`) are also supported.
 
 ### Required Fields
 
 Each incoming event must contain:
 
-* `run\_code` — Non-empty string identifying the experiment run
-* `event\_id` — Source event identifier
-* `source` or `source\_name` — Supported agency/source
+* `run_code` — Non-empty string identifying the experiment run
+* `event_id` — Source event identifier
+* `source` or `source_name` — Supported agency/source
 * `county` — County name
-* `event\_hour` — ISO-8601 timestamp or Python datetime
+* `event_hour` — ISO-8601 timestamp or Python datetime
 
 Additional Kafka fields are retained without filtering.
 
@@ -91,50 +91,50 @@ Additional Kafka fields are retained without filtering.
 
 ```json
 {
-  "run\_code": "demo\_storage\_01",
-  "source": "nasa\_firms",
-  "event\_id": "demo-kafka-firms-001",
+  "run_code": "demo_storage_01",
+  "source": "nasa_firms",
+  "event_id": "demo-kafka-firms-001",
   "county": "Plumas",
-  "event\_hour": "2021-07-13T10:00:00Z",
-  "replay\_scenario": "demo-normal",
-  "scheduled\_arrival\_time": "2021-07-13T10:00:00Z",
-  "delay\_hours": 0,
+  "event_hour": "2021-07-13T10:00:00Z",
+  "replay_scenario": "demo-normal",
+  "scheduled_arrival_time": "2021-07-13T10:00:00Z",
+  "delay_hours": 0,
   "payload": {
-    "fire\_detection\_count": 3,
+    "fire_detection_count": 3,
     "satellite": "VIIRS"
   }
 }
 ```
 
-The MongoDB document preserves the complete original message in `raw\_message`.
+The MongoDB document preserves the complete original message in `raw_message`.
 
 The loader additionally stores:
 
-* Normalized `source\_name`
-* String-normalized `event\_id`
-* Validated and trimmed `run\_code`
-* UTC-normalized `event\_hour`
-* Storage `ingestion\_timestamp`
+* Normalized `source_name`
+* String-normalized `event_id`
+* Validated and trimmed `run_code`
+* UTC-normalized `event_hour`
+* Storage `ingestion_timestamp`
 
-The original Kafka envelope remains preserved in `raw\_message`, even when searchable fields are normalized.
+The original Kafka envelope remains preserved in `raw_message`, even when searchable fields are normalized.
 
-The loader does not recompute `scheduled\_arrival\_time` or `delay\_hours`.
+The loader does not recompute `scheduled_arrival_time` or `delay_hours`.
 
 ### Run-Aware Deduplication
 
 MongoDB uses a unique compound index on:
 
 ```text
-(run\_code, event\_id)
+(run_code, event_id)
 ```
 
 Index name:
 
 ```text
-uniq\_run\_code\_event\_id
+uniq_run_code_event_id
 ```
 
-The index applies to documents with string-valued `run\_code` and `event\_id`.
+The index applies to documents with string-valued `run_code` and `event_id`.
 
 This design ensures:
 
@@ -147,10 +147,10 @@ For example:
 
 |Run code|Event ID|Expected result|
 |-|-|-|
-|`run\_A`|`event\_001`|Inserted|
-|`run\_A`|`event\_001`|Duplicate skipped|
-|`run\_B`|`event\_001`|Inserted|
-|`run\_B`|`event\_001`|Duplicate skipped|
+|`run_A`|`event_001`|Inserted|
+|`run_A`|`event_001`|Duplicate skipped|
+|`run_B`|`event_001`|Inserted|
+|`run_B`|`event_001`|Duplicate skipped|
 
 This behavior supports multiple replay experiments using unchanged source event IDs.
 
@@ -159,15 +159,15 @@ This behavior supports multiple replay experiments using unchanged source event 
 Spark should call:
 
 ```python
-upsert\_county\_hour(connection, record)
+upsert_county_hour(connection, record)
 ```
 
-from `src/storage/postgres\_loader.py`.
+from `src/storage/postgres_loader.py`.
 
 Each input record represents one processed county-hour observation identified by:
 
 ```text
-(run\_code, scenario\_code, county, event\_hour)
+(run_code, scenario_code, county, event_hour)
 ```
 
 Spark supplies the processed measurements, source availability flags, join completeness, and timing metrics.
@@ -176,36 +176,36 @@ Spark supplies the processed measurements, source availability flags, join compl
 
 ```python
 from datetime import datetime, timezone
-from postgres\_loader import get\_connection, upsert\_county\_hour
+from postgres_loader import get_connection, upsert_county_hour
 
 record = {
-    "run\_code": "demo-run-001",
-    "scenario\_code": "demo-normal",
-    "speed\_seconds\_per\_event\_hour": 1.0,
-    "delay\_level": "none",
+    "run_code": "demo-run-001",
+    "scenario_code": "demo-normal",
+    "speed_seconds_per_event_hour": 1.0,
+    "delay_level": "none",
     "county": "Plumas",
-    "event\_hour": "2021-07-13T10:00:00Z",
-    "distinct\_source\_count": 3,
-    "fire\_detection\_count": 3,
-    "pm25\_ug\_m3": 42.5,
-    "temperature\_c": 29.1,
-    "humidity\_pct": 24,
-    "wind\_speed\_m\_s": 3.2,
-    "wind\_direction\_deg": None,
-    "firms\_available": True,
-    "epa\_available": True,
-    "noaa\_available": True,
-    "first\_join\_ready\_at": datetime(
+    "event_hour": "2021-07-13T10:00:00Z",
+    "distinct_source_count": 3,
+    "fire_detection_count": 3,
+    "pm25_ug_m3": 42.5,
+    "temperature_c": 29.1,
+    "humidity_pct": 24,
+    "wind_speed_m_s": 3.2,
+    "wind_direction_deg": None,
+    "firms_available": True,
+    "epa_available": True,
+    "noaa_available": True,
+    "first_join_ready_at": datetime(
         2021, 7, 13, 11, tzinfo=timezone.utc
     ),
-    "processing\_latency\_ms": 250.0,
-    "freshness\_lag\_event\_hours": 1.0,
+    "processing_latency_ms": 250.0,
+    "freshness_lag_event_hours": 1.0,
 }
 
-conn = get\_connection()
+conn = get_connection()
 
 try:
-    fact\_id = upsert\_county\_hour(conn, record)
+    fact_id = upsert_county_hour(conn, record)
 finally:
     conn.close()
 ```
@@ -214,39 +214,39 @@ The example uses synthetic measurements and is not an actual agency observation.
 
 ### Field Mapping
 
-* Kafka `source` maps to normalized MongoDB `source\_name`.
-* Priya's Kafka envelope carries `run\_code`. MongoDB preserves it, and Spark passes the run identifier to PostgreSQL.
-* Kafka `replay\_scenario` maps to the processed `scenario\_code`.
-* Spark provides the replay configuration fields `speed\_seconds\_per\_event\_hour` and `delay\_level`.
+* Kafka `source` maps to normalized MongoDB `source_name`.
+* Priya's Kafka envelope carries `run_code`. MongoDB preserves it, and Spark passes the run identifier to PostgreSQL.
+* Kafka `replay_scenario` maps to the processed `scenario_code`.
+* Spark provides the replay configuration fields `speed_seconds_per_event_hour` and `delay_level`.
 * Kafka `payload` is preserved in full in MongoDB.
 * Spark extracts source-specific measurements from `payload` into PostgreSQL county-hour measurement columns.
-* Spark computes source availability flags, `distinct\_source\_count`, join-ready time, processing latency, and replay-relative freshness lag.
+* Spark computes source availability flags, `distinct_source_count`, join-ready time, processing latency, and replay-relative freshness lag.
 
-The optional PostgreSQL source-event audit path may copy selected source metadata into `source\_payload`, but it does not replace the original Kafka envelope in MongoDB.
+The optional PostgreSQL source-event audit path may copy selected source metadata into `source_payload`, but it does not replace the original Kafka envelope in MongoDB.
 
 No automatic conversion of raw Kafka messages into processed county-hour facts occurs inside the storage loader.
 
 ### PostgreSQL Idempotency
 
-The `fact\_county\_hour` table uses:
+The `fact_county_hour` table uses:
 
 ```sql
-ON CONFLICT (run\_id, scenario\_id, county\_id, time\_id)
+ON CONFLICT (run_id, scenario_id, county_id, time_id)
 ```
 
 to update an existing fact instead of inserting a duplicate.
 
-The first non-null `first\_join\_ready\_at` is retained during updates.
+The first non-null `first_join_ready_at` is retained during updates.
 
-`first\_join\_ready\_at` must be null unless `distinct\_source\_count = 3`, according to the database constraint.
+`first_join_ready_at` must be null unless `distinct_source_count = 3`, according to the database constraint.
 
-The optional `fact\_source\_event` table also includes a unique event key for audit metadata.
+The optional `fact_source_event` table also includes a unique event key for audit metadata.
 
 This design allows Spark microbatches to be retried without creating duplicate county-hour fact rows.
 
 ## Analysis and Evaluation Metrics
 
-The file `sql/analysis\_queries.sql` contains eight analytical and validation queries.
+The file `sql/analysis_queries.sql` contains eight analytical and validation queries.
 
 |Query|Purpose|
 |-|-|
@@ -264,7 +264,7 @@ The file `sql/analysis\_queries.sql` contains eight analytical and validation qu
 A county-hour record is considered fully joined when:
 
 ```text
-distinct\_source\_count = 3
+distinct_source_count = 3
 ```
 
 Final join completeness measures the percentage of county-hour facts with all three source types available.
@@ -274,7 +274,7 @@ Final join completeness measures the percentage of county-hour facts with all th
 A join is on time when:
 
 * All three sources are available.
-* `freshness\_lag\_event\_hours` is not null.
+* `freshness_lag_event_hours` is not null.
 * Freshness lag is within the selected threshold.
 
 The evaluated thresholds are:
@@ -311,7 +311,7 @@ Run the storage audit from the repository root using Python module execution.
 
 ```bat
 
-python -m src.storage.storage\_validation --mode smoke --mongo-scenario sanjana\_smoke\_test --pg-run sanjana\_pg\_smoke\_01
+python -m src.storage.storage_validation --mode smoke --mongo-scenario sanjana_smoke_test --pg-run sanjana_pg_smoke_01
 
 ```
 
@@ -325,13 +325,13 @@ The smoke audit expects 12 MongoDB events (4 per source) and 4 PostgreSQL county
 
 ```bat
 
-python -m src.storage.storage\_validation --mode full --mongo-run-code RUN\_CODE --mongo-scenario SCENARIO --pg-run RUN\_CODE --mongo-database RUN\_DATABASE
+python -m src.storage.storage_validation --mode full --mongo-run-code RUN_CODE --mongo-scenario SCENARIO --pg-run RUN_CODE --mongo-database RUN_DATABASE
 
 ```
 
 
 
-Replace RUN\_CODE, SCENARIO, and RUN\_DATABASE with the actual experiment identifiers and database name.
+Replace RUN_CODE, SCENARIO, and RUN_DATABASE with the actual experiment identifiers and database name.
 
 
 
@@ -364,15 +364,15 @@ Synthetic/smoke-test evidence must be reported separately from measured full-dat
 Local storage verification is performed using:
 
 ```bat
-python src\\storage\\verify\_storage.py
+python src\storage\verify_storage.py
 ```
 
 To capture genuine execution output:
 
 ```bat
-python src\\storage\\verify\_storage.py > src\\storage\\storage\_demo\_output.txt 2>\&1
+python src\storage\verify_storage.py > src\storage\storage_demo_output.txt 2>&1
 
-type src\\storage\\storage\_demo\_output.txt
+type src\storage\storage_demo_output.txt
 ```
 
 Run these commands from the repository root in the same Command Prompt where the PostgreSQL environment variables were configured.
@@ -408,7 +408,7 @@ Each execution generates a new synthetic test identifier, so repeated executions
 The previous MongoDB unique index used:
 
 ```text
-(source\_name, event\_id)
+(source_name, event_id)
 ```
 
 This prevented the same event ID from being retained across different experiment runs for the same source.
@@ -416,13 +416,13 @@ This prevented the same event ID from being retained across different experiment
 The replacement index uses:
 
 ```text
-(run\_code, event\_id)
+(run_code, event_id)
 ```
 
 with the name:
 
 ```text
-uniq\_run\_code\_event\_id
+uniq_run_code_event_id
 ```
 
 ### Local Migration Performed
@@ -432,7 +432,7 @@ The new index was created and verified successfully in the local MongoDB instanc
 After verifying the replacement index, the obsolete index:
 
 ```text
-source\_name\_1\_event\_id\_1
+source_name_1_event_id_1
 ```
 
 was removed.
@@ -482,7 +482,7 @@ The test confirms that duplicate retries are prevented within each run while ide
 The captured output is available in:
 
 ```text
-src/storage/storage\_demo\_output.txt
+src/storage/storage_demo_output.txt
 ```
 
 These results demonstrate local MongoDB run-aware deduplication, PostgreSQL upsert idempotency, and successful execution of the analytical queries.
