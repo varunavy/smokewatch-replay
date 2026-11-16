@@ -11,8 +11,12 @@ replay-relative `freshness_lag_event_hours`, join-ready counts,
 
 ## Completed (2026-11-15)
 
-See [`SUMMARY_2026-11-15.md`](SUMMARY_2026-11-15.md): three full-data
-`fast × {none,moderate,severe}` runs with Postgres upserts (6,000 facts each).
+See [`SUMMARY_2026-11-15.md`](SUMMARY_2026-11-15.md).
+
+- **Official pilot:** `fast__none__rep1__20261115T213514Z` (checksum-matched
+  JSONL, consume-while-produce, 18k Kafka / 6k Postgres, full CSV export).
+- **Diagnostics only:** earlier `fast × {none,moderate,severe}` synthetic-input
+  folders — not for batch-reference claims.
 
 ## Coordination with `run_experiments.sh`
 

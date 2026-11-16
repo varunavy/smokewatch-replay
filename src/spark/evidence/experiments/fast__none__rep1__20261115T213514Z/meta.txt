@@ -1,0 +1,10 @@
+RUN_CODE=fast__none__rep1__20261115T213514Z
+SCENARIO=fast__none
+SPEED=fast DELAY=none REP=1
+INPUT=data/replay_input (official; checksums match evidence/kafka/replay_input_checksums.txt)
+PROTOCOL=Spark processing-time started BEFORE producer (consume-while-produce)
+STARTED_UTC=2026-11-15T21:35:49Z
+PRODUCE_START_UTC=2026-11-15T21:37:31Z
+produce_exit=0 PRODUCE_END_UTC=2026-11-15T21:37:34Z
+STOPPED_UTC=2026-11-15T21:38:04Z
+TOPICS_PRESERVED=yes (firms/epa/noaa still hold 18k for optional Mongo)

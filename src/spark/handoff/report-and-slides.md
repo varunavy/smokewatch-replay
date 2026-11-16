@@ -58,3 +58,9 @@ before running multi-hour experiment packs.
 
 Do **not** claim LSH, differential privacy, or Bloom-filter ownership in the
 Spark section unless River and Sanjana attach separate tested evidence.
+
+Do **not** cite the synthetic-input `…T203657Z` / `…T203746Z` / `…T203822Z`
+folders as batch-reference equality results. Prefer the official pilot
+`fast__none__rep1__20261115T213514Z` (checksum-matched JSONL + full Postgres
+CSV) for measured Kafka→Spark→Postgres claims once Varuna finishes the batch
+check.

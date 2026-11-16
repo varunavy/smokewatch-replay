@@ -1,0 +1,14 @@
+firms.events:0:0
+firms.events:1:6000
+firms.events:2:0
+epa.pm25.events:0:0
+epa.pm25.events:1:6000
+epa.pm25.events:2:0
+noaa.weather.events:0:0
+noaa.weather.events:1:6000
+noaa.weather.events:2:0
+firms.events partitions sum=6000
+epa.pm25.events partitions sum=6000
+noaa.weather.events partitions sum=6000
+total=18000
+(partition detail in topic_counts.txt raw offsets)
