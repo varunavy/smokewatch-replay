@@ -1,0 +1,9 @@
+firms.events:0:0
+firms.events:1:6000
+firms.events:2:0
+epa.pm25.events:0:0
+epa.pm25.events:1:6000
+epa.pm25.events:2:0
+noaa.weather.events:0:0
+noaa.weather.events:1:6000
+noaa.weather.events:2:0

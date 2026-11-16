@@ -1,0 +1,27 @@
+SmokeWatch Replay — Spark Structured Streaming
+  spark=3.5.1  kafka_package=org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1
+  source=kafka  trigger=processing-time  watermark=13 hours
+  topics=['firms.events', 'epa.pm25.events', 'noaa.weather.events']
+  run_code=fast__none__rep1__20261116T225429Z  scenario=fast__none  speed=fast  delay=none
+  aggregation=stateful groupBy(county, event_hour_ts, replay_scenario); collect_set(source); is_join_ready when distinct_source_count=3
+  runtime_spark=3.5.1  java=17.0.21
+subscribed to Kafka topic firms.events (nasa_firms)
+subscribed to Kafka topic epa.pm25.events (epa_pm25)
+subscribed to Kafka topic noaa.weather.events (noaa_weather)
+batch 0: 0 county-hour groups
+batch 1: input_records=2775 county_hour_groups=930 join_ready=920
+batch 1: wrote json -> /Users/rrosevearehunt/Education/DATA226/GroupProject/data/interim/spark/out_fast__none__rep1__20261116T225429Z
+batch 1: postgres upsert complete (930 rows)
+batch 2: input_records=5125 county_hour_groups=1710 join_ready=1705
+batch 2: wrote json -> /Users/rrosevearehunt/Education/DATA226/GroupProject/data/interim/spark/out_fast__none__rep1__20261116T225429Z
+batch 2: postgres upsert complete (1710 rows)
+batch 3: input_records=4365 county_hour_groups=1455 join_ready=1455
+batch 3: wrote json -> /Users/rrosevearehunt/Education/DATA226/GroupProject/data/interim/spark/out_fast__none__rep1__20261116T225429Z
+batch 3: postgres upsert complete (1455 rows)
+batch 4: input_records=3855 county_hour_groups=1285 join_ready=1285
+batch 4: wrote json -> /Users/rrosevearehunt/Education/DATA226/GroupProject/data/interim/spark/out_fast__none__rep1__20261116T225429Z
+batch 4: postgres upsert complete (1285 rows)
+batch 5: input_records=1905 county_hour_groups=635 join_ready=635
+batch 5: wrote json -> /Users/rrosevearehunt/Education/DATA226/GroupProject/data/interim/spark/out_fast__none__rep1__20261116T225429Z
+batch 5: postgres upsert complete (635 rows)
+batch 6: 0 county-hour groups

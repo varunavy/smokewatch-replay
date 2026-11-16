@@ -1,0 +1,41 @@
+# Correctness pilot (UNPACED) — batch-equality only
+# Label: NOT a measured paced fast-speed run (producer used --no-pacing).
+# Input checksums: evidence/kafka/replay_input_checksums.txt
+# (SHA-256 match confirmed for data/replay_input/*.jsonl)
+
+## Environment
+export JAVA_HOME="$HOME/.cache/smokewatch-jdk/jdk-17"
+export PATH="$JAVA_HOME/bin:$PATH"
+export POSTGRES_HOST=127.0.0.1 POSTGRES_PORT=5433
+export POSTGRES_DB=smokewatch POSTGRES_USER=postgres
+export POSTGRES_PASSWORD=  # local Docker; not committed
+
+## Spark (started BEFORE producer; processing-time 2s)
+.venv/bin/python src/spark/streaming_job.py \
+  --source kafka \
+  --bootstrap localhost:9092 \
+  --checkpoint data/interim/spark/ckpt_fast__none__rep1__20261115T213514Z \
+  --output data/interim/spark/out_fast__none__rep1__20261115T213514Z \
+  --run-code fast__none__rep1__20261115T213514Z \
+  --scenario fast__none \
+  --speed fast \
+  --delay none \
+  --reset-checkpoint \
+  --write-postgres \
+  --interval "2 seconds"
+
+## Producer (UNPACED — wall clock ~3s)
+.venv/bin/python src/kafka/replay_producer.py \
+  --input-dir data/replay_input \
+  --speed fast \
+  --delay none \
+  --scenario fast__none \
+  --run-code fast__none__rep1__20261115T213514Z \
+  --no-pacing \
+  --expect-per-source 6000
+
+## Timing / exit (from meta.txt)
+# PRODUCE_START_UTC=2026-11-15T21:37:31Z
+# PRODUCE_END_UTC=2026-11-15T21:37:34Z
+# produce_exit=0
+# MongoDB: not included in this run; topics preserved afterward for optional ingest.

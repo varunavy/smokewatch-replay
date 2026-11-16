@@ -1,0 +1,12 @@
+RUN_CODE=fast__none__rep1__20261116T225429Z
+SCENARIO=fast__none
+SPEED=fast DELAY=none REP=1
+LABEL=measured_paced_fast_none
+INPUT=data/replay_input (official; checksums match evidence/kafka/replay_input_checksums.txt)
+PROTOCOL=Spark processing-time BEFORE producer; producer PACED (no --no-pacing)
+CHECKSUMS_FILE=evidence/kafka/replay_input_checksums.txt
+MONGO=not included
+STARTED_UTC=2026-11-16T22:54:53Z
+PRODUCE_START_UTC=2026-11-16T22:55:07Z
+produce_exit=0 PRODUCE_END_UTC=2026-11-16T22:55:20Z
+STOPPED_UTC=2026-11-16T22:55:45Z

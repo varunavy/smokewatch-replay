@@ -9,14 +9,14 @@ Capture: throughput (input rows / batch), `processing_latency_ms`,
 replay-relative `freshness_lag_event_hours`, join-ready counts,
 `droppedByWatermark` from progress logs.
 
-## Completed (2026-11-15)
+## Completed (2026-11-15 / 16)
 
 See [`SUMMARY_2026-11-15.md`](SUMMARY_2026-11-15.md).
 
-- **Official pilot:** `fast__none__rep1__20261115T213514Z` (checksum-matched
-  JSONL, consume-while-produce, 18k Kafka / 6k Postgres, full CSV export).
-- **Diagnostics only:** earlier `fast × {none,moderate,severe}` synthetic-input
-  folders — not for batch-reference claims.
+- **Measured paced:** `fast__none__rep1__20261116T225429Z` (use for fast/none claims).
+- **Correctness unpaced:** `fast__none__rep1__20261115T213514Z` (batch equality only).
+- **Diagnostics only:** synthetic `…T2036/37/38…` folders — exclude.
+- Mongo status: [`MONGO_STATUS_2026-11-16.md`](MONGO_STATUS_2026-11-16.md).
 
 ## Coordination with `run_experiments.sh`
 

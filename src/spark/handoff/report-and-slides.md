@@ -20,10 +20,16 @@ present (`distinct_source_count = 3`). Micro-batches are written through
 Event time is the UTC `event_hour` carried in the Kafka envelope. The job
 applies a **13-hour watermark** on that field so late arrivals from the
 severe-delay profile (4–12 event-hours) remain eligible for the join state.
-`freshness_lag_event_hours` is defined as replay-relative delay
-`(scheduled_arrival_time − event_hour) / 3600`, not wall-clock age versus
-historical fire timestamps. That keeps on-time join metrics meaningful across
-`none` / `moderate` / `severe` delay conditions.
+Two clocks stay separate in metrics and slides:
+
+- **`freshness_lag_event_hours`** = scheduled arrival delay only:
+  `(scheduled_arrival_time − event_hour) / 3600`. This is the producer’s
+  replay delay profile (`none` / `moderate` / `severe`), not how long Spark
+  took to process the row and not wall-clock age versus 2021 fire time.
+- **`processing_latency_ms`** = observed processing time from the Kafka
+  record timestamp (or scheduled arrival when that is the available event
+  time anchor) to `processed_at` in `foreachBatch`. It measures Spark
+  micro-batch handling lag, not the configured replay delay.
 
 ## Report — Technical difficulty and lesson learned
 
@@ -39,7 +45,7 @@ before running multi-hour experiment packs.
 
 - Three Kafka topics → union → 13 h event-time watermark  
 - Stateful county-hour join; ready only with all three sources  
-- Metrics: processing latency, replay-relative freshness, join-ready rate  
+- Metrics: freshness = scheduled delay; latency = Spark processing ms; join-ready rate  
 - Sink: JSON evidence + optional Postgres upsert  
 
 ## Slide — System flow (talk track ~45s)
@@ -60,7 +66,10 @@ Do **not** claim LSH, differential privacy, or Bloom-filter ownership in the
 Spark section unless River and Sanjana attach separate tested evidence.
 
 Do **not** cite the synthetic-input `…T203657Z` / `…T203746Z` / `…T203822Z`
-folders as batch-reference equality results. Prefer the official pilot
-`fast__none__rep1__20261115T213514Z` (checksum-matched JSONL + full Postgres
-CSV) for measured Kafka→Spark→Postgres claims once Varuna finishes the batch
-check.
+folders as batch-reference equality results.
+
+`fast__none__rep1__20261115T213514Z` is an **unpaced correctness pilot**
+(batch keys/values matched; producer used `--no-pacing`). Use a later
+**paced** official `run_code` for measured fast-speed throughput/latency
+claims. MongoDB was not part of the unpaced pilot unless Sanjana attaches
+separate ingest evidence.
