@@ -80,4 +80,4 @@ Reference check (Nov 10, 2026): Claude searched the web to cross-check the Gruli
 ## Related-work comparison (replay approaches)
 - Help provided by Claude: searched for and summarised related work on replay and stream benchmarks, and drafted the comparison subsection and seven BibTeX entries.
 - My own work: checked the delay paragraph against `replay_producer.py` (delay assigned from event_id and delay profile, arrival = event hour + delay) and reviewed the text before submission.
-- Corrections to Claude's output: none needed for the delay paragraph; I still need to add DOIs and page numbers that are missing for two references.
+- Corrections to Claude's output: none needed for the delay paragraph; missing DOIs and page numbers were added afterwards from DBLP, ACM and Google Research records.
