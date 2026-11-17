@@ -1,0 +1,14 @@
+Run code: SANJANA_MONGO_OFFICIAL_18K_01
+Source: retained official Kafka publication
+
+output_sanjana_official_18k_01
+Output rows: 6000
+Join-ready rows: 6000
+Distinct source counts: {3: 6000}
+Success marker: True
+
+output_sanjana_official_18k_repeat_01
+Output rows: 6000
+Join-ready rows: 6000
+Distinct source counts: {3: 6000}
+Success marker: True

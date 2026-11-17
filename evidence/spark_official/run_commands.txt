@@ -1,0 +1,8 @@
+INITIAL SPARK RUN
+python launch_spark_secure.py python src\spark\streaming_job.py --source kafka --bootstrap localhost:9092 --starting-offsets earliest --run-code SANJANA_MONGO_OFFICIAL_18K_01 --scenario baseline --trigger once --checkpoint data/interim/spark/checkpoint_sanjana_official_18k_01 --output data/interim/spark/output_sanjana_official_18k_01 --write-postgres --app-name SmokeWatch_Sanjana_Official_18K
+
+REPEAT SPARK RUN
+python launch_spark_secure.py python src\spark\streaming_job.py --source kafka --bootstrap localhost:9092 --starting-offsets earliest --run-code SANJANA_MONGO_OFFICIAL_18K_01 --scenario baseline --trigger once --checkpoint data/interim/spark/checkpoint_sanjana_official_18k_repeat_01 --output data/interim/spark/output_sanjana_official_18k_repeat_01 --write-postgres --app-name SmokeWatch_Sanjana_18K_Idempotency_Test
+
+PUBLICATION: Both runs consumed the same retained Kafka publication used for MongoDB. No separate 18K republishing was performed.
+LOG LIMITATION: Full Spark console logs were not saved as repository .log files. Original Spark output and checkpoint directories remain available locally.

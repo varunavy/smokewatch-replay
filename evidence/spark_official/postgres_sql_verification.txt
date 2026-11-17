@@ -1,0 +1,10 @@
+Run code: SANJANA_MONGO_OFFICIAL_18K_01
+SQL 1: SELECT COUNT(*),COUNT(*) FILTER (WHERE f.distinct_source_count=3),COUNT(*) FILTER (WHERE f.firms_available AND f.epa_available AND f.noaa_available),MIN(f.fact_id),MAX(f.fact_id) FROM fact_county_hour f JOIN dim_run r ON f.run_id=r.run_id WHERE r.run_code=%s
+Result (total facts, three-source facts, all-source flags, min fact ID, max fact ID): (6000, 6000, 6000, 39, 6038)
+
+SQL 2: SELECT COUNT(*) FROM (SELECT f.run_id,f.scenario_id,f.county_id,f.time_id FROM fact_county_hour f JOIN dim_run r ON f.run_id=r.run_id WHERE r.run_code=%s GROUP BY f.run_id,f.scenario_id,f.county_id,f.time_id HAVING COUNT(*)>1) d
+Duplicate county-hour keys: 0
+
+Pre-repeat baseline: (6000, 39, 6038)
+Post-repeat actual: (6000, 39, 6038)
+Idempotency: PASS
