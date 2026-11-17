@@ -635,6 +635,8 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     events = union_source_streams(spark, args)
+    if args.source == "kafka":
+        events = events.filter(F.col("message_run_code") == F.lit(args.run_code))
     aggregated = aggregate_county_hour(events, args)
 
     writer = (

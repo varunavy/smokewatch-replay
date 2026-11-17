@@ -1,0 +1,11 @@
+SmokeWatch Official Spark-PostgreSQL Validation 
+Run: SANJANA_MONGO_OFFICIAL_18K_01 
+Official Kafka events: 18000 
+Spark county-hour groups: 6000 
+PostgreSQL facts: 6000 
+Three-source join-ready facts: 6000 
+Duplicate county-hour keys: 0 
+Baseline fact IDs: 39-6038 
+Repeat replay: 18000 events processed 
+After repeat: 6000 facts, IDs 39-6038 
+PostgreSQL idempotency: PASS
