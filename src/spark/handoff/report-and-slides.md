@@ -26,10 +26,13 @@ Two clocks stay separate in metrics and slides:
   `(scheduled_arrival_time − event_hour) / 3600`. This is the producer’s
   replay delay profile (`none` / `moderate` / `severe`), not how long Spark
   took to process the row and not wall-clock age versus 2021 fire time.
-- **`processing_latency_ms`** = observed processing time from the Kafka
-  record timestamp (or scheduled arrival when that is the available event
-  time anchor) to `processed_at` in `foreachBatch`. It measures Spark
-  micro-batch handling lag, not the configured replay delay.
+- **`processing_latency_ms`** = time from the **latest contributing Kafka
+  record timestamp** on the county-hour group (`max(kafka_timestamp)`,
+  falling back to `scheduled_arrival_time` only if Kafka time is null) to
+  Spark’s `processed_at` (`current_timestamp()` inside `foreachBatch`).
+  It is **not** PostgreSQL write-completion time and **not** the configured
+  replay delay. The ~2,738 ms average on the paced `fast`/`none` run is this
+  Spark-side metric.
 
 ## Report — Technical difficulty and lesson learned
 
