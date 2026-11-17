@@ -158,12 +158,17 @@ def build_spark(app_name: str, source: str) -> SparkSession:
     return spark
 
 
-def read_kafka_topic(spark: SparkSession, topic: str, bootstrap: str) -> DataFrame:
+def read_kafka_topic(
+    spark: SparkSession,
+    topic: str,
+    bootstrap: str,
+    starting_offsets: str = "earliest",
+) -> DataFrame:
     return (
         spark.readStream.format("kafka")
         .option("kafka.bootstrap.servers", bootstrap)
         .option("subscribe", topic)
-        .option("startingOffsets", "earliest")
+        .option("startingOffsets", starting_offsets)
         .option("failOnDataLoss", "false")
         .load()
         .select(
@@ -530,7 +535,8 @@ def union_source_streams(spark: SparkSession, args: argparse.Namespace) -> DataF
     frames: list[DataFrame] = []
     if args.source == "kafka":
         for source_name, topic in TOPICS.items():
-            raw = read_kafka_topic(spark, topic, args.bootstrap)
+            raw = read_kafka_topic(
+                spark, topic, args.bootstrap, args.starting_offsets)
             parsed = parse_kafka_envelope(raw)
             print(f"subscribed to Kafka topic {topic} ({source_name})", flush=True)
             frames.append(extract_measurements(parsed, args.scenario))
@@ -554,6 +560,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("--source", choices=("kafka", "file"), default="kafka")
     parser.add_argument("--bootstrap", default=BOOTSTRAP_SERVERS)
+    parser.add_argument(
+        "--starting-offsets",
+        choices=("earliest", "latest"),
+        default="earliest",
+        help="Kafka starting offsets for a new checkpoint (default: earliest).",
+    )
     parser.add_argument("--input-dir", default="data/samples")
     parser.add_argument("--output", default=OUTPUT_PATH, help="JSON output directory")
     parser.add_argument("--checkpoint", default=CHECKPOINT_PATH)
