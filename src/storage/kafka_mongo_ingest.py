@@ -32,6 +32,7 @@ def main():
     parser.add_argument("--run-code", required=True)
     parser.add_argument("--bootstrap", default="localhost:9092")
     parser.add_argument("--expected-events", type=int, default=None)
+    parser.add_argument("--expect-per-source", type=int, default=None)
     parser.add_argument("--idle-seconds", type=int, default=120)
     parser.add_argument("--max-seconds", type=int, default=3600)
     parser.add_argument("--evidence", default=None)
@@ -41,6 +42,10 @@ def main():
         parser.error("--run-code must not be empty")
     if args.expected_events is not None and args.expected_events <= 0:
         parser.error("--expected-events must be positive")
+    if args.expect_per_source is not None and args.expect_per_source <= 0:
+        parser.error("--expect-per-source must be positive")
+    if args.expect_per_source is not None and (args.expected_events is None or args.expected_events != 3 * args.expect_per_source):
+        parser.error("--expected-events must equal 3 * --expect-per-source")
     if args.idle_seconds <= 0 or args.max_seconds <= 0:
         parser.error("Timeouts must be positive")
 
@@ -60,6 +65,7 @@ def main():
     stop_reason = "not_started"
     error_message = None
     stored = None
+    stored_source_counts = {}
     collection_name = None
 
     try:
@@ -84,10 +90,16 @@ def main():
         print("Topics:", ", ".join(TOPICS), flush=True)
         print("Waiting for Kafka events...", flush=True)
 
-        stop_reason = "maximum_runtime_reached"
+        stop_reason = "running"
 
         while time.monotonic() - start < args.max_seconds:
             for message in consumer:
+                if time.monotonic() - start >= args.max_seconds:
+                    stop_reason = "maximum_runtime_reached"
+                    break
+                if time.monotonic() - last_match >= args.idle_seconds:
+                    stop_reason = "idle_timeout"
+                    break
                 event = message.value
 
                 if not isinstance(event, dict):
@@ -117,6 +129,12 @@ def main():
 
                 seen_event_ids.add(event_id)
                 sources[str(event.get("source"))] += 1
+                if args.expected_events is not None and len(seen_event_ids) >= args.expected_events:
+                    stop_reason = "expected_unique_events_reached"
+                    break
+
+            if stop_reason in ("maximum_runtime_reached", "idle_timeout", "expected_unique_events_reached"):
+                break
 
             unique_count = len(seen_event_ids)
 
@@ -135,9 +153,20 @@ def main():
                 )
                 break
 
+        if stop_reason == "running" and time.monotonic() - start >= args.max_seconds:
+            stop_reason = "maximum_runtime_reached"
+
         stored = collection.count_documents(
             {"run_code": args.run_code}
         )
+
+        stored_source_counts = {
+            row["_id"]: row["count"]
+            for row in collection.aggregate([
+                {"$match": {"run_code": args.run_code}},
+                {"$group": {"_id": "$source", "count": {"$sum": 1}}},
+            ])
+        }
 
         unique_count = len(seen_event_ids)
 
@@ -146,6 +175,14 @@ def main():
                 "PASS"
                 if unique_count == args.expected_events
                 and stored == args.expected_events
+                and (
+                    args.expect_per_source is None
+                    or all(
+                        sources[name] == args.expect_per_source
+                        and stored_source_counts.get(name, 0) == args.expect_per_source
+                        for name in ("nasa_firms", "epa_pm25", "noaa_weather")
+                    )
+                )
                 else "FAIL"
             )
         else:
@@ -176,6 +213,7 @@ def main():
         "new_documents_inserted": inserted,
         "stored_documents": stored,
         "source_counts": dict(sources),
+        "stored_source_counts": stored_source_counts,
         "elapsed_seconds": round(time.monotonic() - start, 2),
         "error": error_message,
         "recorded_at_utc": datetime.now(timezone.utc).isoformat(),
