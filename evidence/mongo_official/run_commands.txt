@@ -1,0 +1,6 @@
+VALIDATION TYPE: Independent MongoDB official-data replay 
+RUN CODE: SANJANA_MONGO_OFFICIAL_18K_01 
+FIRST CONSUMER: python src\storage\kafka_mongo_ingest.py --run-code SANJANA_MONGO_OFFICIAL_18K_01 --expected-events 18000 --expect-per-source 6000 --idle-seconds 600 --max-seconds 3600 --evidence evidence\mongo_official\ingestion_live.json 
+PRODUCER: python src\kafka\replay_producer.py --input-dir data\replay_input --bootstrap localhost:9092 --speed fast --delay none --run-code SANJANA_MONGO_OFFICIAL_18K_01 --scenario mongo_independent_validation --no-pacing 
+REPEAT CONSUMER: python src\storage\kafka_mongo_ingest.py --run-code SANJANA_MONGO_OFFICIAL_18K_01 --expected-events 18000 --expect-per-source 6000 --idle-seconds 600 --max-seconds 3600 --evidence evidence\mongo_official\ingestion_repeat.json 
+REPEAT CONSUMER EXIT CODE: 0

@@ -1,0 +1,18 @@
+{
+  "status": "FAIL",
+  "stop_reason": "idle_timeout",
+  "run_code": "SANJANA_MONGO_OFFICIAL_18K_01",
+  "kafka_broker": "localhost:9092",
+  "mongo_collection": "smokewatch.raw_events",
+  "expected_events": 18000,
+  "matched_kafka_messages": 0,
+  "unique_events_processed": 0,
+  "duplicate_kafka_messages": 0,
+  "new_documents_inserted": 0,
+  "stored_documents": 0,
+  "source_counts": {},
+  "stored_source_counts": {},
+  "elapsed_seconds": 120.17,
+  "error": null,
+  "recorded_at_utc": "2026-11-17T07:59:18.910927+00:00"
+}
