@@ -1,0 +1,3 @@
+RUN_CODE=fast__severe__rep1__20261115T203822Z
+SCENARIO=fast__severe
+INPUT=data/replay_input (see data/replay_input/SOURCE.md)

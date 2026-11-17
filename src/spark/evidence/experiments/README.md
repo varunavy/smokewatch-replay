@@ -1,16 +1,22 @@
 # Experiment metrics (Priya 27 runs)
 
 Drop per-run Spark progress excerpts and metric summaries here during the
-9×3 window. Suggested naming:
-
-```
-{speed}__{delay}__rep{N}_progress.log
-{speed}__{delay}__rep{N}_metrics.json
-```
+9×3 window. Suggested naming: folders
+`{speed}__{delay}__rep{N}__{UTC}/` with `metrics.json`, `produce.log`,
+`spark_console.log`, `postgres_db.txt`.
 
 Capture: throughput (input rows / batch), `processing_latency_ms`,
 replay-relative `freshness_lag_event_hours`, join-ready counts,
 `droppedByWatermark` from progress logs.
+
+## Completed (2026-11-15 / 16)
+
+See [`SUMMARY_2026-11-15.md`](SUMMARY_2026-11-15.md).
+
+- **Measured paced:** `fast__none__rep1__20261116T225429Z` (use for fast/none claims).
+- **Correctness unpaced:** `fast__none__rep1__20261115T213514Z` (batch equality only).
+- **Diagnostics only:** synthetic `…T2036/37/38…` folders — exclude.
+- Mongo status: [`MONGO_STATUS_2026-11-16.md`](MONGO_STATUS_2026-11-16.md).
 
 ## Coordination with `run_experiments.sh`
 

@@ -1,0 +1,20 @@
+# Measured PACED fast/none pilot
+# Input checksums: evidence/kafka/replay_input_checksums.txt
+
+## Spark (before producer)
+.venv/bin/python src/spark/streaming_job.py \
+  --source kafka --bootstrap localhost:9092 \
+  --checkpoint data/interim/spark/ckpt_fast__none__rep1__20261116T225429Z \
+  --output data/interim/spark/out_fast__none__rep1__20261116T225429Z \
+  --run-code fast__none__rep1__20261116T225429Z --scenario fast__none \
+  --speed fast --delay none --reset-checkpoint \
+  --write-postgres --interval "2 seconds"
+
+## Producer (PACED — no --no-pacing)
+.venv/bin/python src/kafka/replay_producer.py \
+  --input-dir data/replay_input \
+  --speed fast --delay none --scenario fast__none \
+  --run-code fast__none__rep1__20261116T225429Z \
+  --expect-per-source 6000
+
+# PRODUCE_START/END and produce_exit in meta.txt (~13s wall, matches ~12s fast pacing)

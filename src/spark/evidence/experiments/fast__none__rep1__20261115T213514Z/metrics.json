@@ -1,0 +1,20 @@
+{
+  "run_code": "fast__none__rep1__20261115T213514Z",
+  "scenario": "fast__none",
+  "speed": "fast",
+  "delay": "none",
+  "rep": 1,
+  "input": "official data/replay_input checksum-matched",
+  "protocol": "consume-while-produce (Spark processing-time 2s started before producer)",
+  "kafka_messages": 18000,
+  "postgres_facts": 6000,
+  "join_ready": 6000,
+  "avg_freshness_h": 0.0,
+  "avg_latency_ms": 7318,
+  "batch_count": 2,
+  "final_batch_groups": 0,
+  "postgres_csv": "postgres_county_hour.csv",
+  "postgres_csv_rows": 6000,
+  "label": "official_pilot",
+  "mongo": "not included (pending Sanjana commands); Kafka topics preserved with 18k"
+}

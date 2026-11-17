@@ -1,0 +1,16 @@
+RUN_CODE=fast__none__rep1__20261115T213514Z
+SCENARIO=fast__none
+SPEED=fast DELAY=none REP=1
+LABEL=correctness_pilot_unpaced (NOT measured paced fast)
+INPUT=data/replay_input (official; checksums match evidence/kafka/replay_input_checksums.txt)
+PROTOCOL=Spark processing-time started BEFORE producer (consume-while-produce)
+PRODUCER_FLAGS=--no-pacing (wall produce ~3s; paced fast would be ~12s)
+STARTED_UTC=2026-11-15T21:35:49Z
+PRODUCE_START_UTC=2026-11-15T21:37:31Z
+produce_exit=0 PRODUCE_END_UTC=2026-11-15T21:37:34Z
+STOPPED_UTC=2026-11-15T21:38:04Z
+TOPICS_PRESERVED=yes after stop (18k left for optional Mongo)
+MONGO=not included
+COMMANDS=commands.txt
+CHECKSUMS_FILE=evidence/kafka/replay_input_checksums.txt
+SPARK_CONSOLE=spark_console.log (batch summaries; full progress was local runtime)

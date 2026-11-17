@@ -1,0 +1,20 @@
+{
+  "run_code": "fast__none__rep1__20261116T225429Z",
+  "scenario": "fast__none",
+  "speed": "fast",
+  "delay": "none",
+  "rep": 1,
+  "label": "measured_paced",
+  "pacing": "paced (no --no-pacing)",
+  "producer_wall_seconds": 13.0,
+  "input": "official checksum-matched data/replay_input",
+  "checksums_file": "evidence/kafka/replay_input_checksums.txt",
+  "protocol": "consume-while-produce",
+  "kafka_messages": 18000,
+  "postgres_facts": 6000,
+  "join_ready": 6000,
+  "avg_freshness_h": 0.0,
+  "avg_latency_ms": 2738,
+  "postgres_csv": "postgres_county_hour.csv",
+  "mongo": "not included"
+}
