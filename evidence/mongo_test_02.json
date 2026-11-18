@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "stop_reason": "expected_unique_events_reached",
+  "run_code": "SANJANA_MONGO_TEST_02",
+  "kafka_broker": "localhost:9092",
+  "mongo_collection": "smokewatch.raw_events",
+  "expected_events": 12,
+  "matched_kafka_messages": 12,
+  "unique_events_processed": 12,
+  "duplicate_kafka_messages": 0,
+  "new_documents_inserted": 0,
+  "stored_documents": 12,
+  "source_counts": {
+    "noaa_weather": 4,
+    "epa_pm25": 4,
+    "nasa_firms": 4
+  },
+  "elapsed_seconds": 1.41,
+  "error": null,
+  "recorded_at_utc": "2026-11-17T02:33:04.128901+00:00"
+}

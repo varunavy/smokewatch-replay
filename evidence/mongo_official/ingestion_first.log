@@ -1,0 +1,27 @@
+C:\Users\nevet\smokewatch-replay-sanjana-storage\src\storage\kafka_mongo_ingest.py:75: DeprecationWarning: value_deserializer does not implement kafka.serializer.Deserializer
+  consumer = KafkaConsumer(
+MongoDB: smokewatch.raw_events
+Kafka broker: localhost:9092
+Run code: SANJANA_MONGO_OFFICIAL_18K_01
+Topics: firms.events, epa.pm25.events, noaa.weather.events
+Waiting for Kafka events...
+Idle timeout reached before confirmed completion.
+{
+  "status": "FAIL",
+  "stop_reason": "idle_timeout",
+  "run_code": "SANJANA_MONGO_OFFICIAL_18K_01",
+  "kafka_broker": "localhost:9092",
+  "mongo_collection": "smokewatch.raw_events",
+  "expected_events": 18000,
+  "matched_kafka_messages": 0,
+  "unique_events_processed": 0,
+  "duplicate_kafka_messages": 0,
+  "new_documents_inserted": 0,
+  "stored_documents": 0,
+  "source_counts": {},
+  "stored_source_counts": {},
+  "elapsed_seconds": 120.17,
+  "error": null,
+  "recorded_at_utc": "2026-11-17T07:59:18.910927+00:00"
+}
+Evidence saved: evidence\mongo_official\ingestion_first.json

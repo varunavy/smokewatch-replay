@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "stop_reason": "expected_unique_events_reached",
+  "run_code": "SANJANA_MONGO_OFFICIAL_18K_01",
+  "kafka_broker": "localhost:9092",
+  "mongo_collection": "smokewatch.raw_events",
+  "expected_events": 18000,
+  "matched_kafka_messages": 18000,
+  "unique_events_processed": 18000,
+  "duplicate_kafka_messages": 0,
+  "new_documents_inserted": 18000,
+  "stored_documents": 18000,
+  "source_counts": {
+    "epa_pm25": 6000,
+    "nasa_firms": 6000,
+    "noaa_weather": 6000
+  },
+  "stored_source_counts": {
+    "epa_pm25": 6000,
+    "noaa_weather": 6000,
+    "nasa_firms": 6000
+  },
+  "elapsed_seconds": 242.72,
+  "error": null,
+  "recorded_at_utc": "2026-11-17T08:07:18.948687+00:00"
+}

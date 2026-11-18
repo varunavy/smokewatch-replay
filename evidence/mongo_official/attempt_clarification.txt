@@ -1,0 +1,9 @@
+MongoDB official run: SANJANA_MONGO_OFFICIAL_18K_01
+
+1. ingestion_first.json / ingestion_first.log: INITIAL FAILED ATTEMPT. Status FAIL, stop_reason idle_timeout, 0 matched Kafka messages, 0 inserted documents, 120.17 seconds. This is not successful ingestion evidence.
+
+2. ingestion_live.json / ingestion_live.log: Subsequent successful official ingestion. 18000 unique documents stored, 6000 per source.
+
+3. ingestion_repeat.json / ingestion_repeat.log: Successful repeat validation. 18000 existing documents retained, 0 new inserts.
+
+The initial timeout is retained for transparency; successful ingestion and idempotency are supported by the subsequent live and repeat evidence.
