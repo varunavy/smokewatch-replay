@@ -20,7 +20,7 @@
 | Default offsets | `earliest` so measured replays still drain full topics from a fresh checkpoint | Default remains `earliest`; `latest` is opt-in | Code review of diff `origin/main...48243cf` |
 | `latest` use | Only with fresh checkpoint + coordinated produce (or clear topic window) | Flag added for isolated integration tests; README not expanded in this diff | Code review |
 | `run_code` filter | Isolates warehouse facts to one execution when topics are shared | Filter applied on Kafka path after parse | Code review |
-| Official Spark/Postgres | 18k in → 6k facts, join-ready, idempotent | Summary reports 6k groups, 6k facts, 0 duplicate keys, repeat IDs unchanged | Inspected committed `validation_summary.txt` (did not re-execute) |
+| Official Spark/Postgres | 18k in → 6k facts, join-ready, idempotent | Summary reports 6k groups, 6k facts, 0 duplicate keys, repeat counts and fact-ID ranges unchanged; complete fact-ID-set equality not verified | Inspected committed `validation_summary.txt` (did not re-execute) |
 | Official Mongo | 18k unique docs; retry does not grow set | Commands + evidence under `evidence/mongo_official/` claim 18k + repeat consumer exit 0 | Inspected committed commands/logs (did not re-execute) |
 
 ## Findings
